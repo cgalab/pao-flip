@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "Config.h"
-#include "Monos.h"
+#include "Pao.h"
 
 int main(int argc, char *argv[]) {
 
@@ -17,17 +17,17 @@ int main(int argc, char *argv[]) {
 	static std::list<std::string> args;
 	for(auto i = 1; i < argc; ++i) { args.push_back(std::string(argv[i])); }
 
-	Monos monos(args,true);
+	Pao pao(args);
 
 	std::string title =
 #ifdef CMAKE_BUILD_TYPE
-	"Monos GUI (" CMAKE_BUILD_TYPE ")"
+	"PAO GUI (" CMAKE_BUILD_TYPE ")"
 #else
-	"Monos GUI"
+	"PAO GUI"
 #endif
 	;
 
-	MainWindow w(title, monos);
+	MainWindow w(title, pao);
 	w.show();
 
 	return a.exec();
