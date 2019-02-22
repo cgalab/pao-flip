@@ -1,0 +1,3 @@
+[submodule "triangle"]
+	path = triangle
+	url = git@gitlab.cosy.sbg.ac.at:cg/code/triangle.git
