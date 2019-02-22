@@ -1,11 +1,8 @@
-# MONOS
+# PAO-F
 
-MONOS computes the weighted straight skeleton of a given monotone polygon.
+PAO (polygon area optimization)
 
 # Algorithm
-
-The algorithm is based on the following scientific work: https://doi.org/10.1016/j.ipl.2014.09.021
-"A simple algorithm for computing positively weighted straight skeletons of monotone polygons"
 
 # Input/Output
 
@@ -13,30 +10,15 @@ Reads GraphML .gml or  wavefront .obj format that describes a polygon. Writes th
 same format; .obj gets 3D coordinates which can be imported to programs like
 Blender.
 
-# ToDo's
-- implement weighted bisector (enables weighted variant)
-- implement GraphML output
-- handle multi events and parallel bisectors/input edges
-
-## Optional ToDo's
-- library function
-- GUI version
-
 # Requirements 
 - C++17 enabled complier (gcc,clang)
 - CGAL 
 - Linux or Mac OS
 
-# Installation
-
-- git clone https://gitlab.cosy.sbg.ac.at/cg/ord/monos
-- mkdir -p monos/build && cd monos/build
-- cmake ..
-- make -j 
 
 # Usage
 
-<code>monos [-h] [-v|-s] [-obj &lt;filename&gt;] &lt;filename&gt;</code>
+<code>pao [-h] [-v|-s] [-obj &lt;filename&gt;] &lt;filename&gt;</code>
 
 | options        | description           |
 | -------------:|:------------- |
@@ -48,14 +30,13 @@ Blender.
 
 # Submodules
 
-- easyloggingpp -- https://github.com/muflihun/easyloggingpp
-- gml -- https://gitlab.cosy.sbg.ac.at/cg/ord/gml
+- easyloggingpp
+- triangle 
 
 
 # License
-monos is written in C++ and uses CGAL.  It computes the weighted straight
-skeleton of a monotone polygon.
-Copyright (C) 2018 - Günther Eder - geder@cs.sbg.ac.at
+pao-f is written in C++ and uses CGAL.  
+Copyright (C) 2019 - Günther Eder - geder@cs.sbg.ac.at
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
