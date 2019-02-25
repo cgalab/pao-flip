@@ -13,9 +13,11 @@ int main(int argc, char *argv[]) {
 	for(auto i = 1; i < argc; ++i) { args.push_back(std::string(argv[i])); }
 
 	/* start */
-	Pao pao(args);
+	Pao pao(args,false);
 
-	pao.run();
+	if(pao.isRunnable()) {
+		pao.run();
+	}
 
 	return 0;
 }

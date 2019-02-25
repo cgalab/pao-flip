@@ -25,17 +25,21 @@
 #include "Config.h"
 #include "Data.h"
 #include "cgTypes.h"
+#include "Tri.h"
 
 class Pao {
 public:
-	Pao(std::list<std::string>& args);
+	Pao(std::list<std::string>& args, bool gui = false);
 	virtual ~Pao();
 
 	/**
 	 * a full run of PAO
 	 *  */
 	void run();
+	bool isRunnable() {return config.isValid();}
 
 	Data		*data = nullptr;
 	Config 		config;
+
+	Tri			tri;
 };

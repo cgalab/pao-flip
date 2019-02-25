@@ -44,6 +44,7 @@ add_library(paolib
   src/Config.cpp
   src/tools.cpp
   src/Data.cpp
+  src/Tri.cpp
   src/Pao.cpp
   easyloggingpp/src/easylogging++.cc
   )
@@ -58,6 +59,7 @@ target_compile_definitions(paolib PRIVATE ELPP_CUSTOM_COUT=std::cerr)
 
 target_include_directories(paolib PRIVATE inc)
 target_include_directories(paolib PRIVATE src)
+target_include_directories(paolib PRIVATE ../triangle)
 target_include_directories(paolib PRIVATE src/gml)
 
 include(GNUInstallDirs)

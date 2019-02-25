@@ -25,11 +25,11 @@
 #include "Data.h"
 
 
-Pao::Pao(std::list<std::string>& args)
+Pao::Pao(std::list<std::string>& args, bool gui)
 : config(args) {
-	/* evaluate arguments */
-	if(!config.isValid()) {
-		LOG(ERROR) << "Config Error!";
+	data = new Data(gui);
+	if(config.isValid()) {
+		data->initialize(config);
 	}
 }
 
@@ -41,7 +41,9 @@ Pao::~Pao() {
 void Pao::run() {
 	if(!config.isValid()) {
 		LOG(ERROR) << "Pao::run no valid config!";
-		return;
+	} else {
+		tri.runTriangle(*data);
 	}
+
 }
 

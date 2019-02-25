@@ -30,8 +30,8 @@ MainWindow::MainWindow(const std::string& title, Pao& pao) :
 			xycoord, SLOT(setText(QString)));
 	this->view = ui->gV;
 
-//	input_gi = std::make_shared<InputGraphicsItem>(&monos.data->getBasicInput());
-//	scene.addItem(input_gi.get());
+	input_gi = std::make_shared<InputGraphicsItem>(&pao.data->getBasicInput());
+	scene.addItem(input_gi.get());
 
 	auto input_size = input_gi->boundingRect().size();
 	auto size_avg = (input_size.width() + input_size.height() ) /2.0;

@@ -44,7 +44,7 @@ public:
 	Data(bool gui = false):gui(gui)  {}
 	~Data() {}
 
-	void initialize(const Config& cfg);
+	void initialize(const Config& config);
 
 	const InputPoints&  getVertices() const { return inputVertices; }
 	const Polygon&      getPolygon()  const { return polygon; }
@@ -61,13 +61,7 @@ public:
 	void printInput() const;
 
 	const BasicInput& getBasicInput() const {return basicInput;}
-
-	void setGui(const bool _gui) { gui = _gui; }
-
-	bool 			gui;
-
-	// gui debug
-	std::vector<Edge> lines;
+	const bool gui;
 
 private:
 	bool loadFile(const std::string& fileName);

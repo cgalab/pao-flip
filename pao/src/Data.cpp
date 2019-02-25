@@ -21,10 +21,10 @@
 #include "Data.h"
 #include "tools.h"
 
-void Data::initialize(const Config& cfg) {
+void Data::initialize(const Config& config) {
 	/* load input vertices/polygon and weights */
-	if(cfg.isValid()) {
-		if (!loadFile(cfg.fileName)) {
+	if(config.isValid()) {
+		if (!loadFile(config.fileName)) {
 			assert(false); return;
 		}
 	}
@@ -182,10 +182,6 @@ bool Data::parseGML(std::istream &istream) {
 			poly[max] = {{edge.v, edge.u}};
 		}
 	}
-
-//	for(auto edge : poly) {
-//		std::cout << edge[0] << "-" << edge[1] << "  ";
-//	}
 
 	/* initialize const input variables */
 	inputVertices 	= points;
