@@ -52,13 +52,13 @@ public:
 	const InputPoints&  getVertices() const { return inputVertices; }
 	const Polygon&      getPolygon()  const { return polygon; }
 
-	const IndexEdge e(const uint& idx) const { assert(idx < polygon.size() ); return polygon[idx]; }
-	const Point& v(const uint& idx) const { assert(idx < inputVertices.size()); return inputVertices[idx]; }
-	Edge getEdge(const uint& idx) const;
+	const IndexEdge e(const ul& idx) const { assert(idx < polygon.size() ); return polygon[idx]; }
+	const Point& v(const ul& idx) const { assert(idx < inputVertices.size()); return inputVertices[idx]; }
+	Edge getEdge(const ul& idx) const;
 	Edge getEdge(const EdgeIterator& it) const;
 
-	const Point& eA(const uint& edgeIdx) const {return v(e(edgeIdx)[0]);}
-	const Point& eB(const uint& edgeIdx) const {return v(e(edgeIdx)[1]);}
+	const Point& eA(const ul& edgeIdx) const {return v(e(edgeIdx)[0]);}
+	const Point& eB(const ul& edgeIdx) const {return v(e(edgeIdx)[1]);}
 
 	void addPolyToOBJ(const Config& cfg) const;
 	void printInput() const;

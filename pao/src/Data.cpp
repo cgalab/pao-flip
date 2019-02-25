@@ -30,8 +30,8 @@ void Data::initialize(const Config& cfg) {
 	}
 }
 
-Edge Data::getEdge(const uint& idx) const {
-	assert(idx < (uint)polygon.size());
+Edge Data::getEdge(const ul& idx) const {
+	assert(idx < (ul)polygon.size());
 	return Edge( eA(idx), eB(idx) );
 }
 
@@ -71,7 +71,7 @@ bool Data::loadFile(const std::string& fileName) {
 
 
 bool Data::parseOBJ(const std::vector<std::string>& lines) {
-	std::vector<std::vector<uint>> faces;
+	std::vector<std::vector<ul>> faces;
 
 	InputPoints 	points;
 	Polygon			poly;
@@ -87,7 +87,7 @@ bool Data::parseOBJ(const std::vector<std::string>& lines) {
 		bool setX=true, setY=true, setZ=true;
 		double p_x=-INFINITY, p_y=-INFINITY, p_z=-INFINITY;
 
-		std::vector<uint> facetList;
+		std::vector<ul> facetList;
 
 		for(auto& s : tokens) {
 			/* comments, and not supported or needed obj parameters */
@@ -129,7 +129,7 @@ bool Data::parseOBJ(const std::vector<std::string>& lines) {
 
 	if(!faces.empty()) {
 		auto face = faces[0];
-		for(uint i=0; i < face.size(); ++i) {
+		for(ul i=0; i < face.size(); ++i) {
 			poly.push_back( {{face[i]+OBJOFFSET,face[(i+1)%face.size()]+OBJOFFSET }} );
 			/* input weights are realized via GraphML -- .gml files*/
 		}
@@ -170,7 +170,7 @@ bool Data::parseGML(std::istream &istream) {
 
 	Polygon			poly(edges.size());
 
-	for(uint i=0; i < edges.size(); ++i) {
+	for(ul i=0; i < edges.size(); ++i) {
 		auto edge = edges[i];
 		auto min = std::min(edge.u,edge.v);
 		auto max = std::max(edge.u,edge.v);

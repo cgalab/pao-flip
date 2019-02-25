@@ -28,7 +28,7 @@ public:
 	}
 
 	void printHelpLong() const {
-		std::cout << "  -h \t\t\tpruint this help" << std::endl
+		std::cout << "  -h \t\t\tprul this help" << std::endl
 			 << "  -v \t\t\tverbose mode, shows more information about the computation" << std::endl
 			 << "  -s \t\t\tsilent mode, shows no information" << std::endl
 			 << "  -l \t\t\tlogging verbose output to <filename>.log" << std::endl

@@ -51,13 +51,13 @@ using Exact          = K::FT;
 
 
 using InputPoints   	= std::vector<Point>;
-using IndexEdge 		= std::array<uint,2>;
+using IndexEdge 		= std::array<ul,2>;
 using Polygon   		= std::vector<IndexEdge>;
 using PointIterator 	= std::vector<Point,std::allocator<Point>>::const_iterator;
 
 
-#include "gml/BasicInput.h"
 #include "gml/GMLGraph.h"
+#include "gml/BasicInput.h"
 
 static Point ORIGIN = Point(0,0);
 
