@@ -16,10 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-#ifndef DATA_H_
-#define DATA_H_
+#pragma once
 
 #include <memory>
 #include <assert.h>
@@ -36,12 +33,12 @@
 #include <set>
 #include <string>
 
+#include "Definitions.h"
 #include "cgTypes.h"
 #include "Config.h"
-#include "Definitions.h"
 
 class Data {
-	using EdgeIterator = std::vector<IndexEdge,CORE::allocator<IndexEdge>>::iterator;
+	using EdgeIterator = std::vector<IndexEdge,std::allocator<IndexEdge>>::iterator;
 
 public:
 	Data(bool gui = false):gui(gui)  {}
@@ -86,5 +83,3 @@ private:
 	GMLGraph		gml;
 	BasicInput		basicInput;
 };
-
-#endif /* DATA_H_ */

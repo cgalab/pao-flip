@@ -16,16 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef PAO_H_
-#define PAO_H_
+#pragma once
 
 #include <list>
+
+#include "Definitions.h"
 
 #include "Config.h"
 #include "Data.h"
 #include "cgTypes.h"
-#include "Definitions.h"
 
 class Pao {
 public:
@@ -40,5 +39,3 @@ public:
 	Data		*data = nullptr;
 	Config 		config;
 };
-
-#endif /* PAO_H_ */

@@ -1,5 +1,4 @@
-#ifndef CONFIG_H_
-#define CONFIG_H_
+#pragma once
 
 #include <string>
 #include <list>
@@ -28,7 +27,7 @@ public:
 	}
 
 	void printHelpLong() const {
-		std::cout << "  -h \t\t\tprul this help" << std::endl
+		std::cout << "  -h \t\t\tprint this help" << std::endl
 			 << "  -v \t\t\tverbose mode, shows more information about the computation" << std::endl
 			 << "  -s \t\t\tsilent mode, shows no information" << std::endl
 			 << "  -l \t\t\tlogging verbose output to <filename>.log" << std::endl
@@ -59,5 +58,3 @@ private:
 	std::string 	printOptions;
 	bool	 		validConfig;
 };
-
-#endif /* CONFIG_H_ */

@@ -58,6 +58,7 @@ target_compile_definitions(paolib PRIVATE ELPP_CUSTOM_COUT=std::cerr)
 
 target_include_directories(paolib PRIVATE inc)
 target_include_directories(paolib PRIVATE src)
+target_include_directories(paolib PRIVATE src/gml)
 
 include(GNUInstallDirs)
 

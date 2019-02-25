@@ -1,7 +1,5 @@
 /*
- * monos is written in C++.  It computes the weighted straight skeleton
- * of a monotone polygon in asymptotic n log n time and linear space.
- * Copyright (C) 2018 - Günther Eder - geder@cs.sbg.ac.at
+ * Copyright (C) 2019 - Günther Eder - geder@cs.sbg.ac.at
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef DEFINITIONS_H_
-#define DEFINITIONS_H_
+#pragma once
 
 #include <iostream>
 #include <vector>
 #include <assert.h>
 
 #include "../easyloggingpp/src/easylogging++.h"
-
 
 #define NIL    -1
 #define NOLIST -2
@@ -46,7 +41,5 @@
 
 using ul = unsigned long;
 using sl = signed long;
-#define SMAX std::numeric_limits<sl>::max()
-#define UMAX std::numeric_limits<ul>::max()
-
-#endif
+#define ULMAX std::numeric_limits<ul>::max()
+#define SLMAX std::numeric_limits<sl>::max()

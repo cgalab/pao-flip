@@ -16,22 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef CGTYPES_H_
-#define CGTYPES_H_
+#pragma once
 
 #include <iterator>
 #include <array>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 #include "Definitions.h"
 
 //#include <CGAL/Exact_predicates_exact_constructions_kernel_with_sqrt.h>
 #include <CGAL/Simple_cartesian.h>
 
-#include <CGAL/Aff_transformation_2.h>
-#include <CGAL/aff_transformation_tags.h>
 #include <CGAL/intersections.h>
 #include <CGAL/squared_distance_2.h>
 
@@ -46,7 +43,6 @@ using Circle         = K::Circle_2;
 using Direction      = K::Direction_2;
 using Edge       	 = K::Segment_2;
 using Intersect		 = K::Intersect_2;
-using Transformation = CGAL::Aff_transformation_2<K>;
 using Exact          = K::FT;
 
 
@@ -55,10 +51,6 @@ using IndexEdge 		= std::array<ul,2>;
 using Polygon   		= std::vector<IndexEdge>;
 using PointIterator 	= std::vector<Point,std::allocator<Point>>::const_iterator;
 
-
-#include "gml/GMLGraph.h"
 #include "gml/BasicInput.h"
 
 static Point ORIGIN = Point(0,0);
-
-#endif /* CGALTYPES_H_ */

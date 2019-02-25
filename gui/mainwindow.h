@@ -12,6 +12,8 @@
 #include "Config.h"
 #include "Pao.h"
 
+#include "ui_mainwindow.h"
+
 class MainWindow : public CGAL::Qt::DemosMainWindow {
     Q_OBJECT
 
@@ -29,16 +31,13 @@ class MainWindow : public CGAL::Qt::DemosMainWindow {
     void on_actionQuit_triggered() { close(); };
     void on_actionVisToggleInput_triggered() { updateVisibilities(); };
     void on_actionVisToggleInputLabels_triggered() { updateVisibilities(); };
-    void on_actionVisToggleArcs_triggered() { updateVisibilities(); };
-    void on_actionVisToggleArcLabels_triggered() { updateVisibilities(); };
     void on_actionVisToggleInputEdgesLabels_triggered() { updateVisibilities(); }
 
 	void on_actionResize_triggered();
     void on_actionToggleFullscreen_triggered();
 
+    void on_actionEventStep_triggered();
     void on_actionResetAll_triggered();
-
-    //void on_actionFinishComputation_triggered();
 
     void dragEnterEvent(QDragEnterEvent *e);
     void dropEvent(QDropEvent *e);
@@ -48,7 +47,7 @@ class MainWindow : public CGAL::Qt::DemosMainWindow {
     std::unique_ptr<Ui::MainWindow> ui;
     QGraphicsScene scene;
     QLabel* time_label;
-    NT drawing_time_offset_increment;
+    Exact drawing_time_offset_increment;
 
     Pao& pao;
 

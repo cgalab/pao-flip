@@ -4,8 +4,6 @@
 #include <boost/graph/graphml.hpp>
 #include <string>
 
-#include "cgTypes.h"
-
 template <class T>
 void sort_tuple(T& a, T& b) {
   if (a>b) std::swap(a,b);

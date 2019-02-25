@@ -6,6 +6,7 @@
 
 #include "GMLGraph.h"
 #include "Definitions.h"
+#include "cgTypes.h"
 
 #ifndef CORE_ONE
 #define CORE_ONE NT(1.0)
@@ -14,11 +15,11 @@
 class BasicVertex {
 public:
 	const Point p;
-	const unsigned degree;
-	const uint id;
-	const unsigned reflex_beveling_add;
+	const ul degree;
+	const ul id;
+	const ul reflex_beveling_add;
 
-	BasicVertex(const Point& p, unsigned degree, uint id)
+	BasicVertex(const Point& p, ul degree, ul id)
 	: p(p)
 	, degree(degree)
 	, id(id)
@@ -29,10 +30,10 @@ public:
 
 class BasicEdge {
 public:
-	uint u, v;
-	uint id;
+	ul u, v;
+	ul id;
 
-	BasicEdge(uint u, uint v, uint id)
+	BasicEdge(ul u, ul v, ul id)
 	: u(u)
 	, v(v)
 	, id(id) {}
@@ -41,16 +42,16 @@ public:
 class BasicInput {
 	using VertexList     = std::vector<BasicVertex>;
 	using EdgeList       = std::vector<BasicEdge>;
-	using VertexIdxPair  = std::pair<unsigned,unsigned>;
+	using VertexIdxPair  = std::pair<ul,ul>;
 
 	using PointList      = std::vector<Point>;
-	using SimpleEdgeList = std::vector<std::array<uint,2> >;
+	using SimpleEdgeList = std::vector<std::array<ul,2> >;
 
 private:
-	unsigned num_of_deg1_vertices = 0;
+	ul num_of_deg1_vertices = 0;
 	VertexList vertices_;
 	EdgeList edges_;
-	std::map<VertexIdxPair, unsigned> edge_map;
+	std::map<VertexIdxPair, ul> edge_map;
 	/* keep a list of instances of our number type for the different weights. */
 
 	void assert_valid() const;
@@ -61,14 +62,14 @@ public:
 		vertices_.emplace_back(std::forward<BasicVertex>(p));
 	}
 	/** Add an input edge between vertices to the edgelist */
-	inline void add_edge(unsigned u, unsigned v) {
+	inline void add_edge(ul u, ul v) {
 		sort_tuple(u,v);
 		assert(u < vertices_.size());
 		assert(v < vertices_.size());
 		assert(u!=v);
 
 		edges_.emplace_back(BasicEdge(u,v,edges_.size()));
-		auto res = edge_map.emplace(std::pair<VertexIdxPair,unsigned>(VertexIdxPair(u,v), edges().size()-1));
+		auto res = edge_map.emplace(std::pair<VertexIdxPair,ul>(VertexIdxPair(u,v), edges().size()-1));
 		assert(res.second);
 	}
 
@@ -76,22 +77,22 @@ public:
 	const EdgeList& edges() const { return edges_; };
 	void add_graph(const GMLGraph& graph);
 	void add_list(const PointList& points, const SimpleEdgeList& edges);
-	unsigned get_num_of_deg1_vertices() const {
+	ul get_num_of_deg1_vertices() const {
 		return num_of_deg1_vertices;
 	}
-	unsigned get_total_degree() const {
+	ul get_total_degree() const {
 		return edges().size() * 2;
 	}
-	unsigned get_num_extra_beveling_vertices() const {
+	ul get_num_extra_beveling_vertices() const {
 		/* Includes the extra one vertex we'll need at a minimum for degree-1 vertices. */
 		return num_of_deg1_vertices;
 	}
-	bool has_edge(unsigned u, unsigned v) const {
+	bool has_edge(ul u, ul v) const {
 		sort_tuple(u,v);
 		auto findres = edge_map.find(VertexIdxPair(u, v));
 		return findres != edge_map.end();
 	}
-	const BasicEdge& get_edge(unsigned u, unsigned v) const {
+	const BasicEdge& get_edge(ul u, ul v) const {
 		sort_tuple(u,v);
 		assert(has_edge(u,v));
 		auto findres = edge_map.find(VertexIdxPair(u, v));
@@ -99,7 +100,7 @@ public:
 		return edges_[findres->second];
 	}
 
-	void update_edge(unsigned idx, unsigned u, unsigned v) {
+	void update_edge(ul idx, ul u, ul v) {
 		auto edge = &edges_[idx];
 		sort_tuple(u,v);
 		edge->u = u;

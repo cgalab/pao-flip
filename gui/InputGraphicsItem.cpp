@@ -60,9 +60,6 @@ paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * 
 		for (auto e = input->edges().begin(); e != input->edges().end(); ++e) {
 			const QPointF p(transform.map(convert( CGAL::midpoint(input->get_segment(*e).source(), input->get_segment(*e).target()) )));
 			std::string t = "e#"+std::to_string(e - input->edges().begin());
-			if(e->weight != CORE_ONE) {
-				t += "(" + std::to_string(e->weight.doubleValue()) + ")";
-			}
 			painter->drawText(p.x()+4, p.y(), QString::fromStdString(t));
 		}
 	}

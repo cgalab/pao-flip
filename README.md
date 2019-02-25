@@ -37,7 +37,7 @@ Blender.
 
 
 # License
-pao-f is written in C++ and uses CGAL.  
+pao-flip is written in C++ and uses CGAL.  
 Copyright (C) 2019 - Günther Eder - geder@cs.sbg.ac.at
 
 This program is free software: you can redistribute it and/or modify

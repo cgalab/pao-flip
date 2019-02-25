@@ -104,22 +104,6 @@ void MainWindow::time_changed() {
 }
 
 
-void MainWindow::on_actionTimeForwardAfterChains_triggered() {
-	if(!pao.config.isValid()) {return;}
-
-	on_actionEventStep_triggered();
-
-	time_changed();
-	on_actionResize_triggered();
-}
-
-void MainWindow::on_actionFinishComputation_triggered() {
-	if(!pao.config.isValid()) {return;}
-
-	time_changed();
-	on_actionResize_triggered();
-}
-
 void MainWindow::on_actionEventStep_triggered() {
 	if(!pao.config.isValid()) {return;}
 

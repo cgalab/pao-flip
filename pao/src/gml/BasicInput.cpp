@@ -11,8 +11,8 @@ void BasicInput::add_graph(const GMLGraph& graph) {
 
 	for (auto vp = boost::vertices(graph); vp.first != vp.second; ++vp.first) {
 		const VertexType v = *vp.first;
-		Point p(graph[v].x, graph[v].y);
-		unsigned degree = boost::degree(v, graph);
+		Point p(std::atof(graph[v].x.c_str()), std::atof(graph[v].y.c_str()));
+		ul degree = boost::degree(v, graph);
 		add_vertex(BasicVertex(p, degree, vertices_.size()));
 		assert(index_map[v] == vertices_.size()-1);
 		if (degree == 1) num_of_deg1_vertices++;
@@ -26,8 +26,8 @@ void BasicInput::add_graph(const GMLGraph& graph) {
 }
 
 void BasicInput::assert_valid() const {
-	unsigned* d = new unsigned[vertices_.size()]();
-	unsigned deg1 = 0;
+	ul* d = new ul[vertices_.size()]();
+	ul deg1 = 0;
 
 	assert(edge_map.size() == edges_.size());
 	for (size_t i=0; i<edges_.size(); ++i) {
