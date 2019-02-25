@@ -1,8 +1,10 @@
-# PAO-F
+# PAO-FLIP
 
-PAO (polygon area optimization)
+PAO-FLIP (polygon area optimization using fliping) 
 
 # Algorithm
+
+Given a simple polygon P, pao-flip computes the triangulation of P and CH(P). It tries to increase/decrease the bounded area of P by "flipping" triangles. That is, a reflex vertex and an edge that lie on the boundary of a common triangle are identified. Then, the boundary of P is modified as discussed in the meeting.
 
 # Input/Output
 
