@@ -35,6 +35,16 @@ void Tri::identifyTrisOnReflexInputVertices() {
 	}
 }
 
+bool Tri::isTriOnBoundaryAndReflexVertex(const Triangle& tri) const {
+	if((data->hasEdge(tri.a,tri.b) && data->isReflexVertex(tri.c)) ||
+	   (data->hasEdge(tri.b,tri.c) && data->isReflexVertex(tri.a)) ||
+	   (data->hasEdge(tri.c,tri.a) && data->isReflexVertex(tri.b))
+	) {
+		return true;
+	}
+	return false;
+}
+
 void Tri::filltriangulateioIn(Data& data, triangulateio& tri) {
 	auto& vertices 		= data.getVertices();
 	auto& polygon  		= data.getPolygon();

@@ -66,6 +66,10 @@ public:
 	const BasicInput& getBasicInput() const {return basicInput;}
 	const bool gui;
 
+	bool hasEdge(const ul idxA, const ul idxB) const {
+		return basicInput.has_edge(idxA,idxB);
+	}
+
 private:
 	bool loadFile(const std::string& fileName);
 
@@ -79,6 +83,7 @@ private:
 	 **/
 	InputPoints			inputVertices;
 	std::vector<bool> 	IVreflex;
+	std::vector<bool> 	IVmodified;
 	Polygon 			polygon;
 	ListPolygon			optPoly;
 

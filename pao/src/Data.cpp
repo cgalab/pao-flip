@@ -36,7 +36,8 @@ void Data::initialize(const Config& config) {
 
 
 void Data::identifyConvexReflexInputVertices() {
-	IVreflex = std::vector<bool>(polygon.size(),false);
+	IVreflex   = std::vector<bool>(polygon.size(),false);
+	IVmodified = std::vector<bool>(polygon.size(),false);
 
 	auto it = polygon.begin();
 	while(it != polygon.end()) {

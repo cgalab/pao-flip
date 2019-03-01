@@ -56,6 +56,8 @@ public:
 		return Triangle(tOUT.trianglelist[idx*3],tOUT.trianglelist[idx*3 + 1],tOUT.trianglelist[idx*3 + 2]);
 	}
 
+	bool isTriOnBoundaryAndReflexVertex(const Triangle& tri) const;
+
 	bool triLiesOnReflexVertex(const ul& idx) const {
 		auto t = getTriangle(idx);
 		return     data->isReflexVertex(t.a)
