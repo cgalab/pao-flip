@@ -26,9 +26,10 @@
 
 
 Pao::Pao(std::list<std::string>& args, bool gui)
-: config(args) {
+: config(args,gui) {
 	data = new Data(gui);
 	if(config.isValid()) {
+		/* initialize and load file into 'Data' */
 		data->initialize(config);
 	}
 }
@@ -39,11 +40,26 @@ Pao::~Pao() {
 
 
 void Pao::run() {
-	if(!config.isValid()) {
-		LOG(ERROR) << "Pao::run no valid config!";
-	} else {
+	if(config.isValid()) {
+		/* create triangulation of input */
 		tri.runTriangle(*data);
-	}
 
+//		tri.printTriangles();
+//		tri.printEdges();
+
+		if(config.maximize) {
+			tri.setMaximizingStrategy();
+		} else {
+			tri.setMinimizingStrategy();
+		}
+
+		data->writePolyToOptPoly();
+
+		tri.testSomeFlips();
+
+
+	} else {
+		LOG(ERROR) << "Pao::run no valid config!";
+	}
 }
 

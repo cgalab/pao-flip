@@ -51,11 +51,14 @@ public:
 
 	const IndexEdge e(const ul& idx) const { assert(idx < polygon.size() ); return polygon[idx]; }
 	const Point& v(const ul& idx) const { assert(idx < inputVertices.size()); return inputVertices[idx]; }
-	Edge getEdge(const ul& idx) const;
-	Edge getEdge(const EdgeIterator& it) const;
+	Edge getEdge(const ul& idx) const { return Edge( eA(idx), eB(idx) ); }
+	Edge getEdge(const EdgeIterator& it) const { return Edge( eA((*it)[0]), eB((*it)[1]) ); }
 
 	const Point& eA(const ul& edgeIdx) const {return v(e(edgeIdx)[0]);}
 	const Point& eB(const ul& edgeIdx) const {return v(e(edgeIdx)[1]);}
+
+	const bool isReflexVertex(const ul& idx) {return IVreflex[idx];}
+	void writePolyToOptPoly();
 
 	void addPolyToOBJ(const Config& cfg) const;
 	void printInput() const;
@@ -66,14 +69,19 @@ public:
 private:
 	bool loadFile(const std::string& fileName);
 
+	void identifyConvexReflexInputVertices();
+
 	bool parseOBJ(const std::vector<std::string>& lines);
 	bool parseGML(std::istream &istream);
 	bool parsePOLY(const std::vector<std::string>& lines);
 	/** Input: vertices as 2D coordinates, polygon as edge "list"
 	 *  with index to the inputVertices
 	 **/
-	InputPoints		inputVertices;
-	Polygon 		polygon;
-	GMLGraph		gml;
-	BasicInput		basicInput;
+	InputPoints			inputVertices;
+	std::vector<bool> 	IVreflex;
+	Polygon 			polygon;
+	ListPolygon			optPoly;
+
+	GMLGraph			gml;
+	BasicInput			basicInput;
 };

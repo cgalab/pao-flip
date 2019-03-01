@@ -20,6 +20,7 @@
 
 #include <iterator>
 #include <array>
+#include <list>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -49,6 +50,8 @@ using Exact          = K::FT;
 using InputPoints   	= std::vector<Point>;
 using IndexEdge 		= std::array<ul,2>;
 using Polygon   		= std::vector<IndexEdge>;
+using ListPolygon  		= std::list<IndexEdge>;
+using EdgeList  		= std::vector<IndexEdge>;
 using PointIterator 	= std::vector<Point,std::allocator<Point>>::const_iterator;
 
 #include "gml/BasicInput.h"

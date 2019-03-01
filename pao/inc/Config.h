@@ -12,9 +12,10 @@ public:
 	: fileName("")
 	, verbose(false)
 	, silent(false),gui(_gui)
+	, maximize(true)
  	, outputFileName("")
 	, validConfig(false) {
-		printOptions = "[-h] [-v|-s] ";
+		printOptions = "[-max|-min] [-h] [-v|-s] ";
 		printOptions += "[-poly|-obj <filename>] <filename>";
 	}
 
@@ -28,6 +29,7 @@ public:
 
 	void printHelpLong() const {
 		std::cout << "  -h \t\t\tprint this help" << std::endl
+			 << "  -max/-min \t\t maxmize or minimize polygon (default: max)"
 			 << "  -v \t\t\tverbose mode, shows more information about the computation" << std::endl
 			 << "  -s \t\t\tsilent mode, shows no information" << std::endl
 			 << "  -l \t\t\tlogging verbose output to <filename>.log" << std::endl
@@ -49,6 +51,8 @@ public:
 	bool 			verbose;
 	bool			silent;
 	bool 			gui;
+
+	bool 			maximize;
 
 	std::string		outputFileName;
 

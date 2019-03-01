@@ -27,16 +27,38 @@ void Data::initialize(const Config& config) {
 		if (!loadFile(config.fileName)) {
 			assert(false); return;
 		}
+
+		/* identify convex/reflex vertices */
+		identifyConvexReflexInputVertices();
+
 	}
 }
 
-Edge Data::getEdge(const ul& idx) const {
-	assert(idx < (ul)polygon.size());
-	return Edge( eA(idx), eB(idx) );
-}
 
-Edge Data::getEdge(const EdgeIterator& it) const {
-	return Edge( eA((*it)[0]), eB((*it)[1]) );
+void Data::identifyConvexReflexInputVertices() {
+	IVreflex = std::vector<bool>(polygon.size(),false);
+
+	auto it = polygon.begin();
+	while(it != polygon.end()) {
+		auto ea = getEdge(it);
+		auto eb = getEdge(it);
+		++it;
+		if(it !=  polygon.end()) {
+			eb = getEdge(it);
+		} else {
+			eb = getEdge(polygon.begin());
+		}
+
+		Point A = ea.source();
+		Point B = ea.target();
+		Point C = eb.target();
+
+		if(CGAL::right_turn(A,B,C)) {
+			IVreflex[ (*it)[0] ] = true;
+		} else {
+			IVreflex[ (*it)[0] ] = false;
+		}
+	}
 }
 
 bool Data::loadFile(const std::string& fileName) {
@@ -153,6 +175,11 @@ bool Data::parsePOLY(const std::vector<std::string>& lines) {
 	return false;
 }
 
+void Data::writePolyToOptPoly() {
+	for(auto e : polygon) {
+		optPoly.push_back(e);
+	}
+}
 
 bool Data::parseGML(std::istream &istream) {
 	gml = GMLGraph::create_from_graphml(istream);

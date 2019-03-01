@@ -22,6 +22,10 @@ bool Config::evaluateArguments(std::list<std::string> args) {
 					std::cout << "Use either verbose or silent, -v or -s, not both!";
 				}
 				verbose 		= true;
+			} else if (argument == "-max") {
+				maximize 		= true;
+			} else if (argument == "-min") {
+				maximize 		= false;
 			} else if (argument == "-s") {
 				if(verbose) {
 					std::cout << "Use either verbose or silent, -v or -s, not both!";

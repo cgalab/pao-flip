@@ -33,6 +33,9 @@ MainWindow::MainWindow(const std::string& title, Pao& pao) :
 	input_gi = std::make_shared<InputGraphicsItem>(&pao.data->getBasicInput());
 	scene.addItem(input_gi.get());
 
+	triangle_gi = std::make_shared<TriangleGraphicsItem>(&pao.tri);
+	scene.addItem(triangle_gi.get());
+
 	auto input_size = input_gi->boundingRect().size();
 	auto size_avg = (input_size.width() + input_size.height() ) /2.0;
 
@@ -106,6 +109,8 @@ void MainWindow::time_changed() {
 
 void MainWindow::on_actionEventStep_triggered() {
 	if(!pao.config.isValid()) {return;}
+
+
 
 	time_changed();
 }

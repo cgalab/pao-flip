@@ -13,6 +13,7 @@ add_executable(paogui
                        main.cpp
                        mainwindow.cpp
                        InputGraphicsItem.cpp
+                       TriangleGraphicsItem.cpp
                        )
 target_link_libraries(paogui ${QT_LIBRARIES})
 target_link_libraries(paogui ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES})

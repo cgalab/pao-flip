@@ -20,7 +20,7 @@ InputGraphicsItem(const BasicInput * const input)
   , input(input)
   , painterostream(0)
   , vertices_pen(QPen(::Qt::black, 3))
-  , segments_pen(QPen(::Qt::black, 0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin))
+  , segments_pen(QPen(::Qt::black, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin))
   , labels_pen(QPen(Qt::black, 0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin))
 {
   modelChanged();

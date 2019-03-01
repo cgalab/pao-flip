@@ -9,6 +9,7 @@
 #include <QMimeData>
 
 #include "InputGraphicsItem.h"
+#include "TriangleGraphicsItem.h"
 #include "Config.h"
 #include "Pao.h"
 
@@ -52,6 +53,7 @@ class MainWindow : public CGAL::Qt::DemosMainWindow {
     Pao& pao;
 
     std::shared_ptr<InputGraphicsItem> input_gi;
+    std::shared_ptr<TriangleGraphicsItem> triangle_gi;
 
     void updateVisibilities();
     void update_time_label();

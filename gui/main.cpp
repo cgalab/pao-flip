@@ -19,17 +19,21 @@ int main(int argc, char *argv[]) {
 
 	Pao pao(args,true);
 
-	std::string title =
+	if(pao.isRunnable()) {
+		pao.run();
+
+		std::string title =
 #ifdef CMAKE_BUILD_TYPE
-	"PAO GUI (" CMAKE_BUILD_TYPE ")"
+				"PAO GUI (" CMAKE_BUILD_TYPE ")"
 #else
-	"PAO GUI"
+				"PAO GUI"
 #endif
-	;
+		;
 
-	MainWindow w(title, pao);
-	w.show();
+		MainWindow w(title, pao);
+		w.show();
 
-	return a.exec();
+		return a.exec();
+	}
 	return 0;
 }
