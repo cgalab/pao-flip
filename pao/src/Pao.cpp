@@ -41,7 +41,7 @@ Pao::~Pao() {
 
 void Pao::run() {
 	if(config.isValid()) {
-		LOG(INFO) << "Running triangle...";
+		if(config.verbose) {LOG(INFO) << "Running triangle...";}
 		/* create triangulation of input */
 		tri.runTriangle(*data);
 		tri.setConfig(&config);
@@ -50,25 +50,26 @@ void Pao::run() {
 //		tri.printEdges();
 
 		if(config.maximize) {
-			LOG(INFO) << "Set to maximizing...";
+			if(config.verbose) {LOG(INFO) << "Set to maximizing...";}
 			tri.setMaximizingStrategy();
 		} else {
-			LOG(INFO) << "Set to minimizing...";
+			if(config.verbose) {LOG(INFO) << "Set to minimizing...";}
 			tri.setMinimizingStrategy();
 		}
 
 //		data->writePolyToOptPoly();
 
-		LOG(INFO) << "Testing Flips...";
+		if(config.verbose) {LOG(INFO) << "Testing Flips...";}
 		tri.identifyTrisOnReflexInputVertices();
 
 		while(!tri.isFlippingDone()) {
 			tri.aSingleFlip();
 		}
 
+		data->printPermutation();
 
 	} else {
-		LOG(ERROR) << "Pao::run no valid config!";
+		if(config.verbose) {LOG(ERROR) << "Pao::run no valid config!";}
 	}
 }
 

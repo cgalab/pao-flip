@@ -34,7 +34,7 @@ void Tri::aSingleFlip() {
 		/* obtain last triangle */
 		ul selectIdx = trisOnReflexVertex.back();
 
-		if(config->verbose) {LOG(INFO) << "triangle " << selectIdx;}
+//		if(config->verbose) {LOG(INFO) << "triangle " << selectIdx;}
 
 		trisOnReflexVertex.pop_back();
 		auto tri = getTriangle(selectIdx);
@@ -61,10 +61,10 @@ void Tri::aSingleFlip() {
 		IndexEdge b = *edgeIt;
 
 
-		if(config->verbose) {
-			std::cout << "circle around: " << vertex << " edge vertices: " << a[0] << " "
-					  << b[0] << " " << b[1] << std::endl;
-		}
+//		if(config->verbose) {
+//			std::cout << "circle around: " << vertex << " edge vertices: " << a[0] << " "
+//					  << b[0] << " " << b[1] << std::endl;
+//		}
 
 		bool inPoly;
 		auto triStart = tri;

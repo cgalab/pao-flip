@@ -71,6 +71,8 @@ public:
 	void addPolyToOBJ(const Config& cfg) const;
 	void printInput() const;
 
+	void printPermutation() const;
+
 	const BasicInput& getBasicInput() const {return basicInput;}
 	const bool gui;
 

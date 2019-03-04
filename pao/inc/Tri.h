@@ -49,7 +49,7 @@ public:
 		 * V..Verbose
 		 * Q..quiet
 		 * */
-		std::string mysw = "pznYce";
+		std::string mysw = "pznYQce";
 		triswitches = new char[mysw.length()+1];
 		strcpy(triswitches,mysw.c_str());
 	}

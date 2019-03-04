@@ -79,7 +79,6 @@ void Data::identifyConvexReflexInputVertices() {
 		Point A = v( (*it)[0] );
 		Point B = v( (*it)[1] );
 		Point C;
-		std::cout << (*it)[1];
 		++it;
 		if(it !=  polygon.end()) {
 			C = v( (*it)[1] );
@@ -88,7 +87,6 @@ void Data::identifyConvexReflexInputVertices() {
 		}
 
 		bool isReflex = (CGAL::right_turn(A,B,C)) ? true : false;
-		std::cout << "(" <<isReflex << ") ";
 		if(it == polygon.end()) {
 			IVreflex[ (*polygon.begin())[0] ] = isReflex;
 		} else {
@@ -263,6 +261,12 @@ void Data::printInput() const {
 	std::cout << std::endl;
 }
 
+void Data::printPermutation() const {
+	for(auto edge : polygon) {
+		std::cout  << edge[0] << " ";
+	}
+	std::cout << std::endl;
+}
 
 /*
  * NOTE: this only works if writeOBJ was invoced before, as we only
