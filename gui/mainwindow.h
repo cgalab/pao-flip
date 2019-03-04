@@ -24,6 +24,7 @@ class MainWindow : public CGAL::Qt::DemosMainWindow {
   private:
     bool first_show_event = true;
     bool did_finish = false;
+    ul flipCnt = 0;
 
   private slots:
     void showEvent(QShowEvent *);

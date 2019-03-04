@@ -38,7 +38,6 @@
 #include "Config.h"
 
 class Data {
-	using EdgeIterator = std::vector<IndexEdge,std::allocator<IndexEdge>>::iterator;
 
 public:
 	Data(bool gui = false):gui(gui)  {}
@@ -57,8 +56,17 @@ public:
 	const Point& eA(const ul& edgeIdx) const {return v(e(edgeIdx)[0]);}
 	const Point& eB(const ul& edgeIdx) const {return v(e(edgeIdx)[1]);}
 
-	const bool isReflexVertex(const ul& idx) {return IVreflex[idx];}
-	void writePolyToOptPoly();
+	EdgeIterator findEdgeBefore(const ul& vertexIndex);
+	EdgeIterator nextEdge(const EdgeIterator& it) { return (it != polygon.end()) ? it+1 : polygon.begin(); }
+	EdgeIterator prevEdge(const EdgeIterator& it) { return (it != polygon.begin()) ? it-1 : polygon.end()-1; }
+
+	bool isReflexVertex(const ul& idx) const {return IVreflex[idx];}
+
+	void removePolygonCorner(EdgeIterator afterIt);
+	void addPolygonCorner(EdgeIterator betweenIt, const ul& vertexIdx);
+
+
+//	void writePolyToOptPoly();
 
 	void addPolyToOBJ(const Config& cfg) const;
 	void printInput() const;
@@ -70,10 +78,20 @@ public:
 		return basicInput.has_edge(idxA,idxB);
 	}
 
-private:
-	bool loadFile(const std::string& fileName);
+	bool isEqual(const IndexEdge& a, const IndexEdge& b) const {
+		return     ( (a)[0] == (b)[0] && (a)[1] == (b)[1] )
+				|| ( (a)[0] == (b)[1] && (a)[1] == (b)[0] );
+
+	}
+	bool isEqual(const EdgeIterator& a, const EdgeIterator& b) const {
+		return isEqual(*b,*b);
+
+	}
 
 	void identifyConvexReflexInputVertices();
+
+private:
+	bool loadFile(const std::string& fileName);
 
 	bool parseOBJ(const std::vector<std::string>& lines);
 	bool parseGML(std::istream &istream);
@@ -85,7 +103,7 @@ private:
 	std::vector<bool> 	IVreflex;
 	std::vector<bool> 	IVmodified;
 	Polygon 			polygon;
-	ListPolygon			optPoly;
+//	ListPolygon			optPoly;
 
 	GMLGraph			gml;
 	BasicInput			basicInput;

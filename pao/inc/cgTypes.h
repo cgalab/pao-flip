@@ -32,6 +32,7 @@
 
 #include <CGAL/intersections.h>
 #include <CGAL/squared_distance_2.h>
+#include <CGAL/Polygon_2_algorithms.h>
 
 //using K 			 = CGAL::Exact_predicates_exact_constructions_kernel_with_sqrt;
 using K 			 = CGAL::Simple_cartesian<double>;
@@ -46,13 +47,14 @@ using Edge       	 = K::Segment_2;
 using Intersect		 = K::Intersect_2;
 using Exact          = K::FT;
 
-
 using InputPoints   	= std::vector<Point>;
 using IndexEdge 		= std::array<ul,2>;
 using Polygon   		= std::vector<IndexEdge>;
 using ListPolygon  		= std::list<IndexEdge>;
 using EdgeList  		= std::vector<IndexEdge>;
 using PointIterator 	= std::vector<Point,std::allocator<Point>>::const_iterator;
+
+using EdgeIterator = std::vector<IndexEdge,std::allocator<IndexEdge>>::iterator;
 
 #include "gml/BasicInput.h"
 

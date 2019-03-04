@@ -41,21 +41,30 @@ Pao::~Pao() {
 
 void Pao::run() {
 	if(config.isValid()) {
+		LOG(INFO) << "Running triangle...";
 		/* create triangulation of input */
 		tri.runTriangle(*data);
+		tri.setConfig(&config);
 
 //		tri.printTriangles();
 //		tri.printEdges();
 
 		if(config.maximize) {
+			LOG(INFO) << "Set to maximizing...";
 			tri.setMaximizingStrategy();
 		} else {
+			LOG(INFO) << "Set to minimizing...";
 			tri.setMinimizingStrategy();
 		}
 
-		data->writePolyToOptPoly();
+//		data->writePolyToOptPoly();
 
-		tri.testSomeFlips();
+		LOG(INFO) << "Testing Flips...";
+		tri.identifyTrisOnReflexInputVertices();
+
+		while(!tri.isFlippingDone()) {
+			tri.aSingleFlip();
+		}
 
 
 	} else {

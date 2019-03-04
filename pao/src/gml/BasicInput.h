@@ -100,9 +100,25 @@ public:
 		return edges_[findres->second];
 	}
 
+	void remove_edge(ul u, ul v) {
+		sort_tuple(u,v);
+		assert(has_edge(u,v));
+		auto findres = edge_map.find(VertexIdxPair(u,v));
+		auto edge = &edges_[findres->second];
+		edge->u = 0;
+		edge->v = 0;
+		edge_map.erase(findres);
+	}
+
 	void update_edge(ul idx, ul u, ul v) {
 		auto edge = &edges_[idx];
+
+		auto it = edge_map.find(VertexIdxPair(edge->u,edge->v));
+		edge_map.erase(it);
+
 		sort_tuple(u,v);
+		auto res = edge_map.emplace(std::pair<VertexIdxPair,ul>(VertexIdxPair(u,v), idx));
+
 		edge->u = u;
 		edge->v = v;
 	}

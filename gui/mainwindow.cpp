@@ -110,7 +110,11 @@ void MainWindow::time_changed() {
 void MainWindow::on_actionEventStep_triggered() {
 	if(!pao.config.isValid()) {return;}
 
+	LOG(INFO) << "flip " << ++flipCnt;
+	pao.tri.aSingleFlip();
 
+	scene.removeItem(input_gi.get());
+	scene.addItem(input_gi.get());
 
 	time_changed();
 }

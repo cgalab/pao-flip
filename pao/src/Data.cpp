@@ -34,6 +34,41 @@ void Data::initialize(const Config& config) {
 	}
 }
 
+EdgeIterator Data::findEdgeBefore(const ul& vertexIndex) {
+	for(auto it=polygon.begin(); it != polygon.end(); ++it) {
+		if((*it)[1] == vertexIndex) {
+			return it;
+		}
+	}
+	assert(false);
+	return polygon.begin();
+}
+
+void Data::removePolygonCorner(EdgeIterator afterIt) {
+	auto& eA = *afterIt;
+	auto& eB = *(afterIt+1);
+	basicInput.remove_edge(eA[0],eA[1]);
+	basicInput.remove_edge(eB[0],eB[1]);
+
+	eA[1] = eB[1];
+	polygon.erase(afterIt+1);
+	basicInput.add_edge(eA[0],eA[1]);
+}
+
+void Data::addPolygonCorner(EdgeIterator betweenIt, const ul& vertexIdx) {
+	auto& eOld= *betweenIt;
+	ul targetIdx = eOld[1];
+
+	/* update basic Input */
+	basicInput.remove_edge(eOld[0],eOld[1]);
+	basicInput.add_edge(eOld[0],vertexIdx);
+	basicInput.add_edge(vertexIdx,eOld[1]);
+
+	/* update polygon */
+	eOld[1] = vertexIdx;
+	polygon.insert(betweenIt, {{vertexIdx,targetIdx}} );
+}
+
 
 void Data::identifyConvexReflexInputVertices() {
 	IVreflex   = std::vector<bool>(polygon.size(),false);
@@ -41,23 +76,23 @@ void Data::identifyConvexReflexInputVertices() {
 
 	auto it = polygon.begin();
 	while(it != polygon.end()) {
-		auto ea = getEdge(it);
-		auto eb = getEdge(it);
+		Point A = v( (*it)[0] );
+		Point B = v( (*it)[1] );
+		Point C;
+		std::cout << (*it)[1];
 		++it;
 		if(it !=  polygon.end()) {
-			eb = getEdge(it);
+			C = v( (*it)[1] );
 		} else {
-			eb = getEdge(polygon.begin());
+			C = v( (*polygon.begin())[1] );
 		}
 
-		Point A = ea.source();
-		Point B = ea.target();
-		Point C = eb.target();
-
-		if(CGAL::right_turn(A,B,C)) {
-			IVreflex[ (*it)[0] ] = true;
+		bool isReflex = (CGAL::right_turn(A,B,C)) ? true : false;
+		std::cout << "(" <<isReflex << ") ";
+		if(it == polygon.end()) {
+			IVreflex[ (*polygon.begin())[0] ] = isReflex;
 		} else {
-			IVreflex[ (*it)[0] ] = false;
+			IVreflex[ (*it)[0] ] = isReflex;
 		}
 	}
 }
@@ -163,11 +198,8 @@ bool Data::parseOBJ(const std::vector<std::string>& lines) {
 	/* initialize const input variables */
 	inputVertices 	= points;
 	polygon 		= poly;
+	basicInput.add_list(inputVertices,polygon);
 
-	/* construct BasicInput for GUI */
-	if(gui)  {
-		basicInput.add_list(inputVertices,polygon);
-	}
 	return !inputVertices.empty() && !polygon.empty();
 }
 
@@ -176,11 +208,11 @@ bool Data::parsePOLY(const std::vector<std::string>& lines) {
 	return false;
 }
 
-void Data::writePolyToOptPoly() {
-	for(auto e : polygon) {
-		optPoly.push_back(e);
-	}
-}
+//void Data::writePolyToOptPoly() {
+//	for(auto e : polygon) {
+//		optPoly.push_back(e);
+//	}
+//}
 
 bool Data::parseGML(std::istream &istream) {
 	gml = GMLGraph::create_from_graphml(istream);
