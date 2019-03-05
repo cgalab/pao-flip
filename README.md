@@ -8,9 +8,8 @@ Given a simple polygon P, pao-flip computes the triangulation of P and CH(P). It
 
 # Input/Output
 
-Reads GraphML .gml or  wavefront .obj format that describes a polygon. Writes the
-same format; .obj gets 3D coordinates which can be imported to programs like
-Blender.
+Reads GraphML .gml or  wavefront .obj format that describes a simple polygon. Writes the permutation of the polygon (or
+wavefront .obj).
 
 # Requirements 
 - C++17 enabled complier (gcc,clang)
@@ -20,13 +19,13 @@ Blender.
 
 # Usage
 
-<code>pao [-h] [-v|-s] [-obj &lt;filename&gt;] &lt;filename&gt;</code>
+<code>pao [-h] [-v] [-min|-max] [-obj &lt;filename&gt;] &lt;filename&gt;</code>
 
 | options        | description           |
 | -------------:|:------------- |
 |  -h           |         print this help |
 |  -v           |         verbose mode, shows more information about the computation |
-|  -s           |         silent mode, shows no information |
+|  -min|-max    |         computes a smaller/larger poylgon (default max) |
 |  -obj      |            write output in wavefront obj format (3D coordinates) |
 |  &lt;filename&gt; |           input type is either wavefront obj or GML format |
 
@@ -34,7 +33,6 @@ Blender.
 
 - easyloggingpp
 - triangle 
-
 
 # License
 pao-flip is written in C++ and uses CGAL.  
