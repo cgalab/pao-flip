@@ -21,7 +21,7 @@ TriangleGraphicsItem::TriangleGraphicsItem(Tri * const tri)
 	, tri(tri)
 	, painterostream(0)
 	, vertices_pen(QPen(::Qt::green, 3))
-	, segments_pen(QPen(::Qt::blue, 0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin))
+	, segments_pen(QPen(::Qt::blue, 0, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin))
 	, labels_pen(QPen(Qt::black, 0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin)) {
 
 	modelChanged();
@@ -35,16 +35,20 @@ paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * 
 
 	painterostream = CGAL::Qt::PainterOstream<K> (painter);
 
-	painter->setPen(segmentsPen());
-	if(tri->isTriangulationDone()) {
-		for (ul i = 0; i < tri->getTriangleData()->numberoftriangles; ++i) {
-			auto e = tri->getTriangleEdges(i);
-			painterostream << e[0] << e[1] << e[2];
+	if(visible_triangles) {
+		painter->setPen(segmentsPen());
+		if(tri->isTriangulationDone()) {
+			for (ul i = 0; i < tri->getTriangleData()->numberoftriangles; ++i) {
+				auto edges = tri->getTriangleEdgesNotOnInput(i);
+				for(auto e : edges) {
+					painterostream << e;
+				}
+			}
+	//		for (ul i = 0; i < tri->getTriangleData()->numberofedges; ++i) {
+	//			Edge e = tri->getEdge(i);
+	//			painterostream << e;
+	//		}
 		}
-//		for (ul i = 0; i < tri->getTriangleData()->numberofedges; ++i) {
-//			Edge e = tri->getEdge(i);
-//			painterostream << e;
-//		}
 	}
 	painter->setPen(verticesPen());
 	auto transform = painter->worldTransform();

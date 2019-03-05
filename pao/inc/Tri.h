@@ -121,6 +121,19 @@ public:
 		}
 	}
 
+	std::vector<Edge> getTriangleEdgesNotOnInput(ul idx) const {
+		Triangle t = getTriangle(idx);
+		Edge a(getPoint(t.a), getPoint(t.b));
+		Edge b(getPoint(t.b), getPoint(t.c));
+		Edge c(getPoint(t.c), getPoint(t.a));
+
+		std::vector<Edge> ar;
+		if(!data->hasEdge(t.a,t.b)) {ar.push_back(a);}
+		if(!data->hasEdge(t.b,t.c)) {ar.push_back(b);}
+		if(!data->hasEdge(t.c,t.a)) {ar.push_back(c);}
+		return ar;
+	}
+
 	std::array<Edge,3> getTriangleEdges(ul idx) const {
 		Triangle t = getTriangle(idx);
 		Edge a(getPoint(t.a), getPoint(t.b));
@@ -176,6 +189,8 @@ private:
 	bool flippingDone = false;
 
 	ul lookupTriangles = 100;
+	ul flipCnt = 0;
+	ul flipCheck = 0;
 
 	bool maximizing = true;
 	std::vector<int> trisOnReflexVertex;

@@ -41,17 +41,17 @@ EdgeIterator Data::findEdgeBefore(const ul& vertexIndex) {
 		}
 	}
 	assert(false);
-	return polygon.begin();
+	return polygon.end();
 }
 
 void Data::removePolygonCorner(EdgeIterator afterIt) {
 	auto& eA = *afterIt;
-	auto& eB = *(afterIt+1);
+	auto& eB =  *nextEdge(afterIt);
 	basicInput.remove_edge(eA[0],eA[1]);
 	basicInput.remove_edge(eB[0],eB[1]);
 
 	eA[1] = eB[1];
-	polygon.erase(afterIt+1);
+	polygon.erase(nextEdge(afterIt));
 	basicInput.add_edge(eA[0],eA[1]);
 }
 
@@ -66,7 +66,7 @@ void Data::addPolygonCorner(EdgeIterator betweenIt, const ul& vertexIdx) {
 
 	/* update polygon */
 	eOld[1] = vertexIdx;
-	polygon.insert(betweenIt, {{vertexIdx,targetIdx}} );
+	polygon.insert(nextEdge(betweenIt), {{vertexIdx,targetIdx}} );
 }
 
 

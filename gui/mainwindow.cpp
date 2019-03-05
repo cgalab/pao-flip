@@ -49,6 +49,7 @@ MainWindow::MainWindow(const std::string& title, Pao& pao) :
 	ui->statusBar->addWidget(xycoord, 0);
 
 	time_changed();
+	on_actionResize_triggered();
 }
 
 MainWindow::~MainWindow() {}
@@ -57,6 +58,9 @@ void MainWindow::updateVisibilities() {
 	input_gi->setVisibleLabels(ui->actionVisToggleInputLabels->isChecked());
 	input_gi->setVisibleEdgeLabels(ui->actionVisToggleInputEdgesLabels->isChecked());
 	input_gi->setVisible(ui->actionVisToggleInput->isChecked());
+
+	triangle_gi->setVisibleTriangles(ui->actionVisToggleTriangle->isChecked());
+
 
 //	scene.removeItem(skeleton_gi.get());
 //	scene.addItem(skeleton_gi.get());
@@ -89,7 +93,7 @@ void MainWindow::on_actionResetAll_triggered() {
 	on_actionResize_triggered();
 }
 
-void MainWindow:: showEvent(QShowEvent *) {}
+void MainWindow::showEvent(QShowEvent *) {}
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
 	(void) event;
@@ -110,12 +114,16 @@ void MainWindow::time_changed() {
 void MainWindow::on_actionEventStep_triggered() {
 	if(!pao.config.isValid()) {return;}
 
-	LOG(INFO) << "flip " << ++flipCnt;
-	pao.tri.aSingleFlip();
+	if(!pao.tri.isFlippingDone()) {
+		pao.tri.aSingleFlip();
 
-	scene.removeItem(input_gi.get());
-	scene.addItem(input_gi.get());
+		scene.removeItem(input_gi.get());
+		scene.addItem(input_gi.get());
 
+		if(pao.tri.isFlippingDone()) {
+			pao.data->printPermutation();
+		}
+	}
 	time_changed();
 }
 

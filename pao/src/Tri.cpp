@@ -60,6 +60,7 @@ void Tri::aSingleFlip() {
 		edgeIt = data->nextEdge(edgeIt);
 		IndexEdge b = *edgeIt;
 
+//		std::cout<< "vertex: "<<vertex  << " tri " << tri << " : " << a[0]<< " " << a[1] << " , " << b[0] << " " << b[1] << " ";
 
 //		if(config->verbose) {
 //			std::cout << "circle around: " << vertex << " edge vertices: " << a[0] << " "
@@ -68,7 +69,9 @@ void Tri::aSingleFlip() {
 
 		bool inPoly;
 		auto triStart = tri;
-		/* find out if we are inside or outside*/
+		/********************************************************/
+		/* 		find out if we are inside or outside			*/
+		/********************************************************/
 		do {
 			if((tri.a == vertex && b[1] == tri.b) ||
 			   (tri.b == vertex && b[1] == tri.c) ||
@@ -86,11 +89,16 @@ void Tri::aSingleFlip() {
 			tri = getNextCCWTriangleAroundVertex(tri,vertex);
 		} while( tri.id != triStart.id );
 
+
+		/********************************************************/
+		/* 		find out extreme triangle inside, check if		*/
+		/* 		outside is an ear.								*/
+		/********************************************************/
 		auto outSideArea = CGAL::area(data->v(a[0]),data->v(b[1]),data->v(b[0]));
 		Exact triArea = 0.0;
 		ul triIdx = tri.id;
 
-		/* if a vertex is above line a[0]-b[1], vertex inside(on outside) */
+		/* if a vertex is 'above' line a[0],b[1], vertex inside the outside ear */
 		bool isValidVertex = true;
 		Line referenceLine(data->v(a[0]),data->v(b[1]));
 
@@ -147,16 +155,27 @@ void Tri::aSingleFlip() {
 			   (!maximizing && triArea > outSideArea)) {
 				tri = getTriangle(triIdx);
 
+
+				if(config->verbose) {std::cout << std::endl; data->printPermutation();}
+
 				if(config->verbose) {
 					std::cout << "looking good for " << vertex << std::endl;
-					std::cout << "area change: " << CGAL::abs(outSideArea-triArea) << std::endl;
+					std::cout << "area out: " << outSideArea << " in tri: " << triArea << std::endl;
 					std::cout << "tri " << tri << std::endl;
 				}
 
 				edgeIt = data->prevEdge(edgeIt);
+				if(config->verbose) {
+					std::cout << "edgeit " << (*edgeIt)[0] << ", " << (*edgeIt)[1] << std::endl;
+				}
 				data->removePolygonCorner(edgeIt);
 
 				auto indexEdge = getBoundaryEdge(tri);
+
+				if(config->verbose) {
+					std::cout << "tri-b-edge " << indexEdge[0] << ", " << indexEdge[1] << std::endl;
+				}
+
 				auto edgeItA = data->findEdgeBefore(indexEdge[0]);
 				auto edgeItB = data->findEdgeBefore(indexEdge[1]);
 
@@ -168,11 +187,22 @@ void Tri::aSingleFlip() {
 
 				/* TODO: expensive ... just update the 4 vertices! */
 				data->identifyConvexReflexInputVertices();
+
+				++flipCnt;
+
+				if(config->verbose) {
+					data->printPermutation();
+					LOG(INFO) << "flip " << flipCnt;
+				}
+
+				/* just for testing! */
+				runTriangle(*data);
 			}
 		}
 	} else {
-		if(--lookupTriangles > 0) {
+		if(--lookupTriangles > 0 && flipCnt > flipCheck) {
 			identifyTrisOnReflexInputVertices();
+			flipCheck = flipCnt;
 		} else {
 			flippingDone = true;
 		}
@@ -213,11 +243,11 @@ Exact Tri::getArea(const Triangle& tri) const {
 }
 
 Triangle Tri::getNextCCWTriangleAroundVertex(const Triangle& tri, ul vertex) const {
-	if(vertex == tri.a) {
+	if(vertex == tri.a && tri.nCA != NIL) {
 		return getTriangle(tri.nCA);
-	} else if(vertex == tri.b) {
+	} else if(vertex == tri.b && tri.nAB != NIL) {
 		return getTriangle(tri.nAB);
-	} else if(vertex == tri.c) {
+	} else if(vertex == tri.c && tri.nBC != NIL) {
 		return getTriangle(tri.nBC);
 	}
 	assert(false);

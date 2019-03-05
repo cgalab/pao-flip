@@ -41,6 +41,9 @@ Pao::~Pao() {
 
 void Pao::run() {
 	if(config.isValid()) {
+
+		if(config.verbose) {data->printInput();}
+
 		if(config.verbose) {LOG(INFO) << "Running triangle...";}
 		/* create triangulation of input */
 		tri.runTriangle(*data);
@@ -62,12 +65,13 @@ void Pao::run() {
 		if(config.verbose) {LOG(INFO) << "Testing Flips...";}
 		tri.identifyTrisOnReflexInputVertices();
 
-		while(!tri.isFlippingDone()) {
-			tri.aSingleFlip();
+		if(!config.gui) {
+			while(!tri.isFlippingDone()) {
+				tri.aSingleFlip();
+			}
+
+			data->printPermutation();
 		}
-
-		data->printPermutation();
-
 	} else {
 		if(config.verbose) {LOG(ERROR) << "Pao::run no valid config!";}
 	}

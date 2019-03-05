@@ -23,6 +23,7 @@ class TriangleGraphicsItem :
     QPen labels_pen;
     bool visible_labels      = false;
     bool visible_edge_labels = false;
+    bool visible_triangles	 = true;
 
   protected:
     QRectF bounding_rect;
@@ -43,6 +44,7 @@ class TriangleGraphicsItem :
     const QPen& labelsPen() const { return labels_pen; }
     void setVisibleLabels(bool visible) { if (visible_labels != visible) { prepareGeometryChange(); }; visible_labels = visible; }
     void setVisibleEdgeLabels(bool visible) { if (visible_edge_labels != visible) { prepareGeometryChange(); }; visible_edge_labels = visible; }
+    void setVisibleTriangles(bool visible) { if (visible_triangles != visible) { prepareGeometryChange(); }; visible_triangles = visible; }
 
     void modelChanged();
 };

@@ -57,7 +57,7 @@ public:
 	const Point& eB(const ul& edgeIdx) const {return v(e(edgeIdx)[1]);}
 
 	EdgeIterator findEdgeBefore(const ul& vertexIndex);
-	EdgeIterator nextEdge(const EdgeIterator& it) { return (it != polygon.end()) ? it+1 : polygon.begin(); }
+	EdgeIterator nextEdge(const EdgeIterator& it) { return (it+1 != polygon.end()) ? it+1 : polygon.begin(); }
 	EdgeIterator prevEdge(const EdgeIterator& it) { return (it != polygon.begin()) ? it-1 : polygon.end()-1; }
 
 	bool isReflexVertex(const ul& idx) const {return IVreflex[idx];}

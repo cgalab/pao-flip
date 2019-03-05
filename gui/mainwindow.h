@@ -24,7 +24,6 @@ class MainWindow : public CGAL::Qt::DemosMainWindow {
   private:
     bool first_show_event = true;
     bool did_finish = false;
-    ul flipCnt = 0;
 
   private slots:
     void showEvent(QShowEvent *);
@@ -34,7 +33,7 @@ class MainWindow : public CGAL::Qt::DemosMainWindow {
     void on_actionVisToggleInput_triggered() { updateVisibilities(); };
     void on_actionVisToggleInputLabels_triggered() { updateVisibilities(); };
     void on_actionVisToggleInputEdgesLabels_triggered() { updateVisibilities(); }
-
+    void on_actionVisToggleTriangle_triggered() {updateVisibilities();}
 	void on_actionResize_triggered();
     void on_actionToggleFullscreen_triggered();
 

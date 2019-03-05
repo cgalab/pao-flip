@@ -69,6 +69,7 @@
    <addaction name="actionToggleFullscreen"/>
    <addaction name="separator"/>
    <addaction name="actionVisToggleInput"/>
+   <addaction name="actionVisToggleTriangle"/>
    <addaction name="actionVisToggleInputLabels"/>
    <addaction name="actionVisToggleInputEdgesLabels"/>
    <addaction name="actionEventStep"/>
@@ -108,6 +109,23 @@
    </property>
    <property name="shortcut">
     <string>I</string>
+   </property>
+  </action>
+  <action name="actionVisToggleTriangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>T</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Trianglulation (T)</string>
+   </property>
+   <property name="shortcut">
+    <string>T</string>
    </property>
   </action>
   <action name="actionResize">
