@@ -123,6 +123,9 @@ void MainWindow::on_actionEventStep_triggered() {
 		scene.removeItem(input_gi.get());
 		scene.addItem(input_gi.get());
 
+		scene.removeItem(triangle_gi.get());
+		scene.addItem(triangle_gi.get());
+
 		if(pao.tri.isFlippingDone()) {
 			pao.data->printPermutation();
 		}

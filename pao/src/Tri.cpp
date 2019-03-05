@@ -257,6 +257,7 @@ Exact Tri::getArea(const Triangle& tri) const {
 
 void Tri::repairTriangulationOn(std::vector<ul> tris) {
 	assert(tris.size() > 1);
+	LOG(ERROR) << "repair flipping! not done yet!";
 	for(auto t1 = tris.begin(), t2 = t1+1; t2 != tris.end(); ++t1, ++t2) {
 		flipPair( *t1, *t2 );
 		LOG(INFO) << "Triangle " << *t1;
