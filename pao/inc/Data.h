@@ -65,6 +65,7 @@ public:
 	void removePolygonCorner(EdgeIterator afterIt);
 	void addPolygonCorner(EdgeIterator betweenIt, const ul& vertexIdx);
 
+	bool isNextVertexReflex(EdgeIterator& it);
 
 //	void writePolyToOptPoly();
 

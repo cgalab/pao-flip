@@ -102,6 +102,8 @@ void Tri::aSingleFlip() {
 		bool isValidVertex = true;
 		Line referenceLine(data->v(a[0]),data->v(b[1]));
 
+		std::vector<ul> outsideTrisToRepair;
+
 		triStart = tri;
 		do {
 			if((tri.a == vertex && b[1] == tri.b) ||
@@ -143,6 +145,14 @@ void Tri::aSingleFlip() {
 				}
 				if(referenceLine.has_on_positive_side(check)) {
 					isValidVertex = false;
+				}
+
+				/* if outside tri is not a[0]a[1]b[1] */
+				if(!isOnVertices(tri,a[0],a[1],b[1])) {
+					if(config->verbose) {
+						LOG(INFO) << "outside tri " << tri << " added to repair stack";
+					}
+					outsideTrisToRepair.push_back(tri.id);
 				}
 			}
 
@@ -186,7 +196,8 @@ void Tri::aSingleFlip() {
 				data->addPolygonCorner(edgeItA, vertex);
 
 				/* TODO: expensive ... just update the 4 vertices! */
-				data->identifyConvexReflexInputVertices();
+				//data->identifyConvexReflexInputVertices();
+				// no update is done when removing/adding vertices
 
 				++flipCnt;
 
@@ -195,8 +206,10 @@ void Tri::aSingleFlip() {
 					LOG(INFO) << "flip " << flipCnt;
 				}
 
+				repairTriangulationOn(outsideTrisToRepair);
+
 				/* just for testing! */
-				runTriangle(*data);
+				//runTriangle(*data);
 			}
 		}
 	} else {
@@ -240,6 +253,44 @@ void Tri::identifyTrisOnReflexInputVertices() {
 
 Exact Tri::getArea(const Triangle& tri) const {
 	return CGAL::area(getPoint(tri.a),getPoint(tri.b),getPoint(tri.c));
+}
+
+void Tri::repairTriangulationOn(std::vector<ul> tris) {
+	assert(tris.size() > 1);
+	for(auto t1 = tris.begin(), t2 = t1+1; t2 != tris.end(); ++t1, ++t2) {
+		flipPair( *t1, *t2 );
+		LOG(INFO) << "Triangle " << *t1;
+	}
+}
+
+void Tri::flipPair(Triangle ta, Triangle tb) {
+	auto cp = getCommonPair(ta,tb);
+	ul taM = getMissingCorner(ta,cp[0],cp[1]);
+	ul tbM = getMissingCorner(tb,cp[0],cp[1]);
+
+	Triangle taNew(ta.id, taM,cp[1],tbM, ta.diagonalNeighbor(cp[0]), tb.diagonalNeighbor(cp[0]) ,tb.id );
+	Triangle tbNew(tb.id, tbM,cp[0],taM, tb.diagonalNeighbor(cp[1]), ta.diagonalNeighbor(cp[1]), ta.id );
+
+	writeBack(taNew);
+	writeBack(tbNew);
+}
+
+void Tri::writeBack(const Triangle& tri) {
+	tOUT.trianglelist[tri.id*3    ] = tri.a;
+	tOUT.trianglelist[tri.id*3 + 1] = tri.b;
+	tOUT.trianglelist[tri.id*3 + 2] = tri.c;
+	tOUT.neighborlist[tri.id*3    ] = tri.diagonalNeighbor(tri.a);
+	tOUT.neighborlist[tri.id*3 + 1] = tri.diagonalNeighbor(tri.b);
+	tOUT.neighborlist[tri.id*3 + 2] = tri.diagonalNeighbor(tri.c);
+}
+
+std::array<ul,2> Tri::getCommonPair(const Triangle& ta, const Triangle& tb) const {
+	std::vector<ul> vect;
+	if(hasCorner(tb,ta.a)) {vect.push_back(ta.a);}
+	if(hasCorner(tb,ta.b)) {vect.push_back(ta.b);}
+	if(hasCorner(tb,ta.c)) {vect.push_back(ta.c);}
+	assert(vect.size() == 2);
+	return {{ vect[0],vect[1] }};
 }
 
 Triangle Tri::getNextCCWTriangleAroundVertex(const Triangle& tri, ul vertex) const {

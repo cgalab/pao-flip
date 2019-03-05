@@ -53,6 +53,11 @@ void Data::removePolygonCorner(EdgeIterator afterIt) {
 	eA[1] = eB[1];
 	polygon.erase(nextEdge(afterIt));
 	basicInput.add_edge(eA[0],eA[1]);
+
+	/* fix reflex settings */
+	IVreflex[ (*afterIt)[1] ] = isNextVertexReflex(afterIt);
+	afterIt = nextEdge(afterIt);
+	IVreflex[ (*afterIt)[1] ] = isNextVertexReflex(afterIt);
 }
 
 void Data::addPolygonCorner(EdgeIterator betweenIt, const ul& vertexIdx) {
@@ -67,7 +72,15 @@ void Data::addPolygonCorner(EdgeIterator betweenIt, const ul& vertexIdx) {
 	/* update polygon */
 	eOld[1] = vertexIdx;
 	polygon.insert(nextEdge(betweenIt), {{vertexIdx,targetIdx}} );
+
+	/* fix reflex settings */
+	IVreflex[ (*betweenIt)[1] ] = isNextVertexReflex(betweenIt);
+	betweenIt = nextEdge(betweenIt);
+	IVreflex[ (*betweenIt)[1] ] = isNextVertexReflex(betweenIt);
+	betweenIt = nextEdge(betweenIt);
+	IVreflex[ (*betweenIt)[1] ] = isNextVertexReflex(betweenIt);
 }
+
 
 
 void Data::identifyConvexReflexInputVertices() {
@@ -76,24 +89,20 @@ void Data::identifyConvexReflexInputVertices() {
 
 	auto it = polygon.begin();
 	while(it != polygon.end()) {
-		Point A = v( (*it)[0] );
-		Point B = v( (*it)[1] );
-		Point C;
+		IVreflex[ (*it)[1] ] = isNextVertexReflex(it);
 		++it;
-		if(it !=  polygon.end()) {
-			C = v( (*it)[1] );
-		} else {
-			C = v( (*polygon.begin())[1] );
-		}
-
-		bool isReflex = (CGAL::right_turn(A,B,C)) ? true : false;
-		if(it == polygon.end()) {
-			IVreflex[ (*polygon.begin())[0] ] = isReflex;
-		} else {
-			IVreflex[ (*it)[0] ] = isReflex;
-		}
 	}
 }
+
+bool Data::isNextVertexReflex(EdgeIterator& it) {
+	Point A = v( (*it)[0] );
+	Point B = v( (*it)[1] );
+	Point C = v( (*nextEdge(it))[1]  );
+
+	return CGAL::right_turn(A,B,C);
+}
+
+
 
 bool Data::loadFile(const std::string& fileName) {
 	if(fileExists(fileName)) {

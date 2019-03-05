@@ -28,12 +28,12 @@ public:
 	ul a, b, c;
 	sl nAB, nBC, nCA;
 
-//	ul getThirdIdx(const ul x, const ul y) const {
-//		std::set s = {a,b,c};
-//		s.erase(x);
-//		s.erase(y);
-//		return *s.begin();
-//	}
+	sl diagonalNeighbor(ul i) const {
+		if(i == a) { return nBC; }
+		if(i == b) { return nCA; }
+		if(i == c) { return nAB; }
+		return NIL;
+	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Triangle& dt);
 	friend bool operator==(const Triangle& a, const Triangle& b);
@@ -54,7 +54,7 @@ public:
 		strcpy(triswitches,mysw.c_str());
 	}
 
-	~Tri() {delete triswitches;}
+	~Tri() {delete triswitches; }
 
 	void runTriangle(Data& data);
 
@@ -70,6 +70,8 @@ public:
 		return Triangle(idx,tOUT.trianglelist[idx*3],tOUT.trianglelist[idx*3 + 1],tOUT.trianglelist[idx*3 + 2],
 					    tOUT.neighborlist[idx*3 + 2],tOUT.neighborlist[idx*3],tOUT.neighborlist[idx*3 + 1]);
 	}
+
+	void writeBack(const Triangle& tri);
 
 	Triangle getNextCCWTriangleAroundVertex(const Triangle& tri, ul vertex) const;
 
@@ -121,6 +123,14 @@ public:
 		}
 	}
 
+	bool hasCorner(const Triangle& tri, const ul a) const {
+		return tri.a == a || tri.b == a || tri.c == a;
+	}
+
+	bool isOnVertices(const Triangle& tri, const ul a, const ul b, const ul c) const {
+		return hasCorner(tri,a) &&  hasCorner(tri,b) && hasCorner(tri,c);
+	}
+
 	std::vector<Edge> getTriangleEdgesNotOnInput(ul idx) const {
 		Triangle t = getTriangle(idx);
 		Edge a(getPoint(t.a), getPoint(t.b));
@@ -157,6 +167,27 @@ public:
 
 	const triangulateio* getTriangleData() const { return &tOUT; }
 
+	void repairTriangulationOn(std::vector<ul> tris);
+
+	void flipPair(Triangle ta, Triangle tb);
+	void flipPair(ul a, ul b) {flipPair(getTriangle(a),getTriangle(b));}
+
+	std::array<ul,2> getCommonPair(const Triangle& ta, const Triangle& tb) const;
+
+	ul getMissingCorner(const Triangle& tri, ul x, ul y) const {
+		std::array<ul,3> array = {{tri.a,tri.b,tri.c}};
+		for(auto i : array) {
+			if(i != x && i != y) {
+				return i;
+			}
+		}
+		assert(false);
+		return 0;
+	}
+
+
+	void setConfig(Config* config_) {config = config_;}
+
 	bool isFlippingDone() {return flippingDone; }
 
 	void setMaximizingStrategy() {maximizing = true;}
@@ -165,16 +196,8 @@ public:
 	void printTriangles() const;
 	void printEdges() const;
 
-//	/* for gui */
-//	void fillEdges() {
-//		for (ul i = 0; i < tOUT.numberofedges; ++i) {
-//			edges.push_back(getEdge(i));
-//		}
-//	}
-//
-//	std::vector<Edge> edges;
 
-	void setConfig(Config* config_) {config = config_;}
+	ul getFlipCnt() const {return flipCnt;}
 
 private:
 	void filltriangulateioIn(Data& data, triangulateio& tri);

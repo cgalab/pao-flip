@@ -115,7 +115,10 @@ void MainWindow::on_actionEventStep_triggered() {
 	if(!pao.config.isValid()) {return;}
 
 	if(!pao.tri.isFlippingDone()) {
-		pao.tri.aSingleFlip();
+		auto cnt = pao.tri.getFlipCnt();
+		while(!pao.tri.isFlippingDone() && cnt == pao.tri.getFlipCnt()) {
+			pao.tri.aSingleFlip();
+		}
 
 		scene.removeItem(input_gi.get());
 		scene.addItem(input_gi.get());
