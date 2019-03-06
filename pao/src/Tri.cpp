@@ -137,14 +137,23 @@ void Tri::aSingleFlip() {
 			} else {
 				/* check outside triangles */
 				Point check;
+				ul checkIdx;
 				if(tri.a == vertex) {
+					checkIdx = tri.b;
 					check = data->v(tri.b);
 				} else if(tri.b == vertex) {
+					checkIdx = tri.c;
 					check = data->v(tri.c);
 				} else if(tri.c == vertex) {
+					checkIdx = tri.a;
 					check = data->v(tri.a);
 				}
 				if(referenceLine.has_on_positive_side(check)) {
+					isValidVertex = false;
+				}
+				/* check for colinearity of external boundary vertex */
+				if(a[0] != checkIdx && b[1] != checkIdx &&
+						CGAL::collinear(p(a[0]),check,p(b[1]))) {
 					isValidVertex = false;
 				}
 
@@ -264,7 +273,6 @@ Exact Tri::getArea(const Triangle& tri) const {
 
 void Tri::repairTriangulationOn(std::list<ul> tris, const ul vertex) {
 	assert(tris.size() > 1);
-
 
 	while(tris.size() > 1) {
 		auto t1 = tris.begin();
