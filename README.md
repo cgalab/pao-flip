@@ -27,7 +27,7 @@ a wavefront .obj file).
 |  -v           |         verbose mode, shows more information about the computation |
 |  -s           |         silent mode, keep the output quiet except for the final permutation |
 |  -r           |         switch reflex sensitive flipping ON |
-|  -min|-max    |         computes a smaller/larger poylgon (default max) |
+|  -min,-max    |         computes a smaller/larger poylgon (default max) |
 |  -obj      |            write output in wavefront obj format (3D coordinates) |
 |  &lt;filename&gt; |           input type is either wavefront obj or GML format |
 
