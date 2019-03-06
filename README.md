@@ -4,12 +4,12 @@ PAO-FLIP (polygon area optimization using fliping)
 
 # Algorithm
 
-Given a simple polygon P, pao-flip computes the triangulation of P and CH(P). It tries to increase/decrease the bounded area of P by "flipping" triangles. That is, a reflex vertex and an edge that lie on the boundary of a common triangle are identified. Then, the boundary of P is modified as discussed in the meeting.
+Given a simple polygon P, pao-flip computes the triangulation of P and CH(P). It tries to increase/decrease the bounded area of P by "flipping" reflex vertices of P and boundary edges using the triangles provided by Triangle. 
 
 # Input/Output
 
 Reads GraphML .gml or  wavefront .obj format that describes a simple polygon. Writes the permutation of the polygon (or
-wavefront .obj).
+a wavefront .obj file).
 
 # Requirements 
 - C++17 enabled complier (gcc,clang)
@@ -19,12 +19,14 @@ wavefront .obj).
 
 # Usage
 
-<code>pao [-h] [-v] [-min|-max] [-obj &lt;filename&gt;] &lt;filename&gt;</code>
+<code>pao [-h] [-v|-s] [-r] [-min|-max] [-obj &lt;filename&gt;] &lt;filename&gt;</code>
 
 | options        | description           |
 | -------------:|:------------- |
 |  -h           |         print this help |
 |  -v           |         verbose mode, shows more information about the computation |
+|  -s           |         silent mode, keep the output quiet except for the final permutation |
+|  -r           |         switch reflex sensitive flipping ON |
 |  -min|-max    |         computes a smaller/larger poylgon (default max) |
 |  -obj      |            write output in wavefront obj format (3D coordinates) |
 |  &lt;filename&gt; |           input type is either wavefront obj or GML format |
