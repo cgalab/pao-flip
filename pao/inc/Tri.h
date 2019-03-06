@@ -47,6 +47,8 @@ public:
 		else if(nCA == nOld) {nCA=nNew;}
 	}
 
+	bool isValid() { return a != b && b != c && a != c; }
+
 	friend std::ostream& operator<<(std::ostream& os, const Triangle& dt);
 	friend bool operator==(const Triangle& a, const Triangle& b);
 	friend bool operator!=(const Triangle& a, const Triangle& b);
@@ -86,6 +88,7 @@ public:
 	void writeBack(const Triangle& tri);
 
 	Triangle getNextCCWTriangleAroundVertex(const Triangle& tri, ul vertex) const;
+	Triangle getNextCWTriangleAroundVertex(const Triangle& tri, ul vertex) const;
 
 	Exact getArea(const Triangle& tri) const;
 
@@ -183,6 +186,8 @@ public:
 
 	void repairTriangulationOn(std::list<ul> tris, const ul vertex);
 
+	void reflexSensitiveFlipping(Triangle tri, const ul vertex);
+
 	void flipPair(Triangle ta, Triangle tb);
 	void flipPair(ul a, ul b) {flipPair(getTriangle(a),getTriangle(b));}
 
@@ -199,19 +204,20 @@ public:
 		return 0;
 	}
 
+	Triangle getNeighborWithoutVertex(const Triangle t, const ul vertex);
+
 	bool isConvexQuad(const Triangle& ta, const Triangle& tb) const;
 
 	void setConfig(Config* config_) {config = config_;}
 
-	bool isFlippingDone() {return flippingDone; }
-
 	void setMaximizingStrategy() {maximizing = true;}
 	void setMinimizingStrategy() {maximizing = false;}
+	void setReflexSensitive(bool rs) {isReflexSensitiveFlipping = rs;}
 
 	void printTriangles() const;
 	void printEdges() const;
 
-
+	bool isFlippingDone() {return flippingDone; }
 	ul getFlipCnt() const {return flipCnt;}
 
 private:
@@ -231,5 +237,7 @@ private:
 	ul flipCheck = 0;
 
 	bool maximizing = true;
+	bool isReflexSensitiveFlipping = false;
+
 	std::vector<int> trisOnReflexVertex;
 };

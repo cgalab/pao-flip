@@ -26,6 +26,8 @@ bool Config::evaluateArguments(std::list<std::string> args) {
 				maximize 		= true;
 			} else if (argument == "-min") {
 				maximize 		= false;
+			} else if (argument == "-r") {
+				reflexSensitiveFlipping = true;
 			} else if (argument == "-s") {
 				if(verbose) {
 					std::cout << "Use either verbose or silent, -v or -s, not both!";

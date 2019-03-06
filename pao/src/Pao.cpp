@@ -60,6 +60,11 @@ void Pao::run() {
 			tri.setMinimizingStrategy();
 		}
 
+		tri.setReflexSensitive(config.reflexSensitiveFlipping);
+		if(config.verbose && config.reflexSensitiveFlipping)  {
+			LOG(INFO) << "reflex sensitive flipping ON...";
+		}
+
 //		data->writePolyToOptPoly();
 
 		if(config.verbose) {LOG(INFO) << "Testing Flips...";}

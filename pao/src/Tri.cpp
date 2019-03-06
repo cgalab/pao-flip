@@ -26,8 +26,8 @@ void Tri::aSingleFlip() {
 	if(!trisOnReflexVertex.empty()) {
 		/* obtain last triangle */
 		ul selectIdx = trisOnReflexVertex.back();
-
 		trisOnReflexVertex.pop_back();
+
 		auto tri = getTriangle(selectIdx);
 		if(!triLiesOnReflexVertex(tri)) {
 			if(config->verbose) {
@@ -113,6 +113,14 @@ void Tri::aSingleFlip() {
 			}
 
 			if(inPoly) {
+
+				/* add -r argument when running pao-flip to activat this option */
+				if(isReflexSensitiveFlipping) {
+					auto tri_prev = getNextCWTriangleAroundVertex(tri,vertex);
+					reflexSensitiveFlipping(tri,vertex);
+					tri = getNextCCWTriangleAroundVertex(tri_prev,vertex);
+				}
+
 				if(isFlippable(tri, vertex)) {
 					/* find max area triangle */
 					auto area = getArea(tri);
@@ -295,6 +303,31 @@ void Tri::repairTriangulationOn(std::list<ul> tris, const ul vertex) {
 	}
 }
 
+void Tri::reflexSensitiveFlipping(Triangle tri, const ul vertex) {
+	auto triCP = getNeighborWithoutVertex(tri,vertex);
+	if(triCP.isValid()) {
+		auto ie = getCommonPair(tri, triCP);
+		/* check to avoid flipping input edges */
+		if(!data->hasEdge(ie[0],ie[1]) ) {
+			if(isConvexQuad(tri,triCP)) {
+				flipPair(tri,triCP);
+			}
+		}
+	}
+}
+
+Triangle Tri::getNeighborWithoutVertex(const Triangle t, const ul vertex) {
+	for(auto i : {t.nAB, t.nBC, t.nCA} ) {
+		if(i != NIL) {
+			auto tri = getTriangle(i);
+			if(!hasCorner(tri,vertex)) {
+				return tri;
+			}
+		}
+	}
+	return Triangle();
+}
+
 void Tri::flipPair(Triangle ta, Triangle tb) {
 	auto cp = getCommonPair(ta,tb);
 	ul taM = getMissingCorner(ta,cp[0],cp[1]);
@@ -312,14 +345,18 @@ void Tri::flipPair(Triangle ta, Triangle tb) {
 	/* repair back links of neighbours */
 	std::vector<Triangle> nUpdate;
 	for(auto nid : { tb.diagonalNeighbor(cp[1]), ta.diagonalNeighbor(cp[1]) } ) {
-		auto tN = getTriangle(nid);
-		tN.updateNeibhorFromTo(tb.id,ta.id);
-		nUpdate.push_back(tN);
+		if(nid != NIL) {
+			auto tN = getTriangle(nid);
+			tN.updateNeibhorFromTo(tb.id,ta.id);
+			nUpdate.push_back(tN);
+		}
 	}
 	for(auto nid : { ta.diagonalNeighbor(cp[0]), tb.diagonalNeighbor(cp[0]) } ) {
-		auto tN = getTriangle(nid);
-		tN.updateNeibhorFromTo(ta.id,tb.id);
-		nUpdate.push_back(tN);
+		if(nid != NIL) {
+			auto tN = getTriangle(nid);
+			tN.updateNeibhorFromTo(ta.id,tb.id);
+			nUpdate.push_back(tN);
+		}
 	}
 	for(auto t : nUpdate) {
 		writeBack(t);
@@ -330,10 +367,6 @@ bool Tri::isConvexQuad(const Triangle& ta, const Triangle& tb) const {
 	auto cp = getCommonPair(ta,tb);
 	ul taM = getMissingCorner(ta,cp[0],cp[1]);
 	ul tbM = getMissingCorner(tb,cp[0],cp[1]);
-
-	//Line l(p(taM),p(tbM));
-	//return l.has_on_positive_side(p(cp[1])) && l.has_on_negative_side(p(cp[0]));
-
 	return CGAL::left_turn(p(taM),p(cp[0]),p(tbM)) && CGAL::left_turn(p(tbM),p(cp[1]),p(taM));
 }
 
@@ -362,6 +395,7 @@ std::array<ul,2> Tri::getCommonPair(const Triangle& ta, const Triangle& tb) cons
 	return {{ vect[0],vect[1] }};
 }
 
+/* CCW !! rotation */
 Triangle Tri::getNextCCWTriangleAroundVertex(const Triangle& tri, ul vertex) const {
 	if(vertex == tri.a && tri.nCA != NIL) {
 		return getTriangle(tri.nCA);
@@ -371,19 +405,26 @@ Triangle Tri::getNextCCWTriangleAroundVertex(const Triangle& tri, ul vertex) con
 		return getTriangle(tri.nBC);
 	}
 	if(config->verbose) {
-		LOG(INFO) << "getNextCCWTriangleAroundVertex failed for vertex " << vertex << " on tri: " << tri;
+		LOG(INFO) << "CCW: getNextCCWTriangleAroundVertex failed for vertex " << vertex << " on tri: " << tri;
+		if(tri.nBC != NIL)  {LOG(INFO) << "aN: " << getTriangle(tri.nBC);}
+		if(tri.nCA != NIL)  {LOG(INFO) << "bN: "  << getTriangle(tri.nCA);}
+		if(tri.nAB != NIL)  {LOG(INFO) << "cN: "  << getTriangle(tri.nAB);}
+	}
+	assert(false);
+	return Triangle();
+}
 
-		if(tri.nBC != NIL)  {
-			LOG(INFO) << "aN: " << getTriangle(tri.nBC);
-		}
-		if(tri.nCA != NIL)  {
-			LOG(INFO) << "bN: "  << getTriangle(tri.nCA);
-		}
-		if(tri.nAB != NIL)  {
-			LOG(INFO) << "cN: "  << getTriangle(tri.nAB);
-		}
-
-
+/* CW !! rotation */
+Triangle Tri::getNextCWTriangleAroundVertex(const Triangle& tri, ul vertex) const {
+	if(vertex == tri.a && tri.nAB != NIL) {
+		return getTriangle(tri.nAB);
+	} else if(vertex == tri.b && tri.nBC != NIL) {
+		return getTriangle(tri.nBC);
+	} else if(vertex == tri.c && tri.nCA != NIL) {
+		return getTriangle(tri.nCA);
+	}
+	if(config->verbose) {
+		LOG(INFO) << "CW: getNextCWTriangleAroundVertex failed for vertex " << vertex << " on tri: " << tri;
 	}
 	assert(false);
 	return Triangle();
