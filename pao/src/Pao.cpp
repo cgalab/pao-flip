@@ -42,7 +42,7 @@ Pao::~Pao() {
 void Pao::run() {
 	if(config.isValid()) {
 
-		if(config.verbose) {data->printInput();}
+		//if(config.verbose) {data->printInput();}
 
 		if(config.verbose) {LOG(INFO) << "Running triangle...";}
 		/* create triangulation of input */

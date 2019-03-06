@@ -39,7 +39,9 @@
 
 #define INFPOINT Point(std::numeric_limits<double>::max(),std::numeric_limits<double>::max())
 
-using ul = unsigned long;
-using sl = signed long;
+//using ul = unsigned long;
+//using sl = signed long;
+using ul = unsigned int;
+using sl = signed int;
 #define ULMAX std::numeric_limits<ul>::max()
 #define SLMAX std::numeric_limits<sl>::max()

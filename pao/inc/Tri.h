@@ -18,11 +18,17 @@ extern "C" {
 
 class Triangle {
 public:
-	Triangle(ul id=0, ul a=0, ul b=0, ul c=0, ul nAB=0, ul nBC=0, ul nCA=0)
+	Triangle(ul id=0, ul a=0, ul b=0, ul c=0, sl nAB=0, sl nBC=0, sl nCA=0)
 	: id(id)
 	, a(a), b(b), c(c)
 	, nAB(nAB), nBC(nBC), nCA(nCA)	{}
 	~Triangle() {}
+
+	void setClassic(ul id_, ul a_, ul b_, ul c_, sl nBC_, sl nCA_, sl nAB_) {
+		id=id_;a=a_;b=b_;c=c_;nAB=nAB_;nBC=nBC_;nCA=nCA_;
+	}
+
+	void setNeighbors(sl nBC_, sl nCA_, sl nAB_) {nAB=nAB_;nBC=nBC_;nCA=nCA_;}
 
 	ul id;
 	ul a, b, c;
@@ -33,6 +39,12 @@ public:
 		if(i == b) { return nCA; }
 		if(i == c) { return nAB; }
 		return NIL;
+	}
+
+	void updateNeibhorFromTo(sl nOld, sl nNew) {
+		if(nAB == nOld) {nAB=nNew;}
+		else if(nBC == nOld) {nBC=nNew;}
+		else if(nCA == nOld) {nCA=nNew;}
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Triangle& dt);
@@ -165,9 +177,11 @@ public:
 		return Point(tOUT.pointlist[idx*2], tOUT.pointlist[idx*2 + 1]);
 	}
 
+	Point p(const ul idx) const {return data->v(idx);}
+
 	const triangulateio* getTriangleData() const { return &tOUT; }
 
-	void repairTriangulationOn(std::vector<ul> tris);
+	void repairTriangulationOn(std::list<ul> tris, const ul vertex);
 
 	void flipPair(Triangle ta, Triangle tb);
 	void flipPair(ul a, ul b) {flipPair(getTriangle(a),getTriangle(b));}
@@ -185,6 +199,7 @@ public:
 		return 0;
 	}
 
+	bool isConvexQuad(const Triangle& ta, const Triangle& tb) const;
 
 	void setConfig(Config* config_) {config = config_;}
 

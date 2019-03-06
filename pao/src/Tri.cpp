@@ -2,7 +2,7 @@
 #include "Tri.h"
 
 std::ostream& operator<<(std::ostream& os, const Triangle& dt) {
-    os << "(" << dt.id << ") " << dt.a << ',' << dt.b << ',' << dt.c << " N[" << dt.nAB << "," << dt.nBC << "," << dt.nCA << "]";
+    os << "(" << dt.id << ") " << dt.a << ',' << dt.b << ',' << dt.c << " N[" << dt.nBC << "," << dt.nCA << "," << dt.nAB << "]";
     return os;
 }
 bool operator==(const Triangle& a, const Triangle& b) {return a.id == b.id;}
@@ -24,17 +24,8 @@ void Tri::runTriangle(Data& data) {
 void Tri::aSingleFlip() {
 
 	if(!trisOnReflexVertex.empty()) {
-		/* sort reflex triangle indeces*/
-		//std::sort(trisOnReflexVertex.begin(),trisOnReflexVertex.end(),std::greater<>());
-
-//		ul selectIdx = (ul)(std::rand() % trisOnReflexVertex.size());
-//		auto tri = getTriangle(trisOnReflexVertex[selectIdx]);
-//		trisOnReflexVertex.erase(trisOnReflexVertex.begin()+selectIdx);
-
 		/* obtain last triangle */
 		ul selectIdx = trisOnReflexVertex.back();
-
-//		if(config->verbose) {LOG(INFO) << "triangle " << selectIdx;}
 
 		trisOnReflexVertex.pop_back();
 		auto tri = getTriangle(selectIdx);
@@ -54,18 +45,22 @@ void Tri::aSingleFlip() {
 
 		auto edgeIt = data->findEdgeBefore(vertex);
 
+		if(!data->isNextVertexReflex(edgeIt)) {
+			LOG(ERROR) << "vertex not reflex?";
+			return;
+		}
+
 		assert(edgeIt != data->getPolygon().end());
 
 		IndexEdge a = *edgeIt;
 		edgeIt = data->nextEdge(edgeIt);
 		IndexEdge b = *edgeIt;
 
-//		std::cout<< "vertex: "<<vertex  << " tri " << tri << " : " << a[0]<< " " << a[1] << " , " << b[0] << " " << b[1] << " ";
-
-//		if(config->verbose) {
+		if(config->verbose) {
 //			std::cout << "circle around: " << vertex << " edge vertices: " << a[0] << " "
 //					  << b[0] << " " << b[1] << std::endl;
-//		}
+//			LOG(INFO) << "vertex: " << vertex;
+		}
 
 		bool inPoly;
 		auto triStart = tri;
@@ -95,14 +90,14 @@ void Tri::aSingleFlip() {
 		/* 		outside is an ear.								*/
 		/********************************************************/
 		auto outSideArea = CGAL::area(data->v(a[0]),data->v(b[1]),data->v(b[0]));
-		Exact triArea = 0.0;
+		Exact triArea = (maximizing) ? std::numeric_limits<Exact>::max() : 0.0;
 		ul triIdx = tri.id;
 
 		/* if a vertex is 'above' line a[0],b[1], vertex inside the outside ear */
 		bool isValidVertex = true;
 		Line referenceLine(data->v(a[0]),data->v(b[1]));
 
-		std::vector<ul> outsideTrisToRepair;
+		std::list<ul> outsideTrisToRepair;
 
 		triStart = tri;
 		do {
@@ -122,12 +117,12 @@ void Tri::aSingleFlip() {
 					/* find max area triangle */
 					auto area = getArea(tri);
 					if(maximizing) {
-						if(triArea < area) {
+						if(area < triArea) {
 							triArea = area;
 							triIdx  = tri.id;
 						}
 					} else {
-						if(triArea < area) {
+						if(area > triArea) {
 							triArea = area;
 							triIdx  = tri.id;
 						}
@@ -150,13 +145,18 @@ void Tri::aSingleFlip() {
 				/* if outside tri is not a[0]a[1]b[1] */
 				if(!isOnVertices(tri,a[0],a[1],b[1])) {
 					if(config->verbose) {
-						LOG(INFO) << "outside tri " << tri << " added to repair stack";
+						//LOG(INFO) << "outside tri " << tri << " added to repair stack";
 					}
 					outsideTrisToRepair.push_back(tri.id);
 				}
 			}
 
 			tri = getNextCCWTriangleAroundVertex(tri,vertex);
+
+			if(config->verbose) {
+				//LOG(INFO) << "(while) tri it " << tri;
+			}
+
 		} while( tri.id != triStart.id && isValidVertex );
 
 		/* change polygon "flip" */
@@ -165,8 +165,7 @@ void Tri::aSingleFlip() {
 			   (!maximizing && triArea > outSideArea)) {
 				tri = getTriangle(triIdx);
 
-
-				if(config->verbose) {std::cout << std::endl; data->printPermutation();}
+				//if(config->verbose) {std::cout << std::endl; data->printPermutation();}
 
 				if(config->verbose) {
 					std::cout << "looking good for " << vertex << std::endl;
@@ -195,21 +194,16 @@ void Tri::aSingleFlip() {
 
 				data->addPolygonCorner(edgeItA, vertex);
 
-				/* TODO: expensive ... just update the 4 vertices! */
-				//data->identifyConvexReflexInputVertices();
-				// no update is done when removing/adding vertices
-
 				++flipCnt;
 
 				if(config->verbose) {
-					data->printPermutation();
+					//data->printPermutation();
 					LOG(INFO) << "flip " << flipCnt;
 				}
 
-				repairTriangulationOn(outsideTrisToRepair);
-
-				/* just for testing! */
-				//runTriangle(*data);
+				if(outsideTrisToRepair.size() > 0) {
+					repairTriangulationOn(outsideTrisToRepair, vertex);
+				}
 			}
 		}
 	} else {
@@ -255,12 +249,49 @@ Exact Tri::getArea(const Triangle& tri) const {
 	return CGAL::area(getPoint(tri.a),getPoint(tri.b),getPoint(tri.c));
 }
 
-void Tri::repairTriangulationOn(std::vector<ul> tris) {
+void Tri::repairTriangulationOn(std::list<ul> tris, const ul vertex) {
 	assert(tris.size() > 1);
-	LOG(ERROR) << "repair flipping! not done yet!";
-	for(auto t1 = tris.begin(), t2 = t1+1; t2 != tris.end(); ++t1, ++t2) {
-		flipPair( *t1, *t2 );
-		LOG(INFO) << "Triangle " << *t1;
+
+
+	while(tris.size() > 1) {
+		auto t1 = tris.begin();
+		auto t2 = t1; ++t2;
+		sl checkCnt = tris.size();
+
+		while(t2 != tris.end()) {
+			if(config->verbose) {
+				LOG(INFO) << "t1  " << getTriangle(*t1);
+				LOG(INFO) << "t2  " << getTriangle(*t2);
+			}
+
+			/* check if the two triangles form a convex quadrilateral */
+			if(isConvexQuad(getTriangle(*t1),getTriangle(*t2))) {
+				/* if so we flip them */
+				flipPair( *t1, *t2 );
+
+				if(config->verbose) {
+					LOG(INFO) << "rt1 " << getTriangle(*t1);
+					LOG(INFO) << "rt2 " << getTriangle(*t2);
+					std::cout << std::endl;
+				}
+
+				/* find the triangle that is still connected to 'vertex'
+				 * and erase the other from the list 					*/
+				auto tri1 = getTriangle(*t1);
+				if(!hasCorner(tri1,vertex)) {
+					tris.erase(t1);
+					t1 = t2;
+					++t2;
+				} else {
+					tris.erase(t2);
+					t2 = t1; ++t2;
+				}
+			} else {
+				t1 = t2;
+				++t2;
+			}
+		}
+		assert(checkCnt != tris.size());
 	}
 }
 
@@ -269,11 +300,41 @@ void Tri::flipPair(Triangle ta, Triangle tb) {
 	ul taM = getMissingCorner(ta,cp[0],cp[1]);
 	ul tbM = getMissingCorner(tb,cp[0],cp[1]);
 
-	Triangle taNew(ta.id, taM,cp[1],tbM, ta.diagonalNeighbor(cp[0]), tb.diagonalNeighbor(cp[0]) ,tb.id );
-	Triangle tbNew(tb.id, tbM,cp[0],taM, tb.diagonalNeighbor(cp[1]), ta.diagonalNeighbor(cp[1]), ta.id );
+	Triangle taNew(ta.id, taM,cp[0],tbM, NIL,NIL,NIL); //ta.diagonalNeighbor(cp[0]), tb.diagonalNeighbor(cp[0]) ,tb.id );
+	Triangle tbNew(tb.id, tbM,cp[1],taM, NIL,NIL,NIL); //tb.diagonalNeighbor(cp[1]), ta.diagonalNeighbor(cp[1]), ta.id );
+
+	taNew.setNeighbors(tb.diagonalNeighbor(cp[1]),tb.id,ta.diagonalNeighbor(cp[1]));
+	tbNew.setNeighbors(ta.diagonalNeighbor(cp[0]),ta.id,tb.diagonalNeighbor(cp[0]));
 
 	writeBack(taNew);
 	writeBack(tbNew);
+
+	/* repair back links of neighbours */
+	std::vector<Triangle> nUpdate;
+	for(auto nid : { tb.diagonalNeighbor(cp[1]), ta.diagonalNeighbor(cp[1]) } ) {
+		auto tN = getTriangle(nid);
+		tN.updateNeibhorFromTo(tb.id,ta.id);
+		nUpdate.push_back(tN);
+	}
+	for(auto nid : { ta.diagonalNeighbor(cp[0]), tb.diagonalNeighbor(cp[0]) } ) {
+		auto tN = getTriangle(nid);
+		tN.updateNeibhorFromTo(ta.id,tb.id);
+		nUpdate.push_back(tN);
+	}
+	for(auto t : nUpdate) {
+		writeBack(t);
+	}
+}
+
+bool Tri::isConvexQuad(const Triangle& ta, const Triangle& tb) const {
+	auto cp = getCommonPair(ta,tb);
+	ul taM = getMissingCorner(ta,cp[0],cp[1]);
+	ul tbM = getMissingCorner(tb,cp[0],cp[1]);
+
+	//Line l(p(taM),p(tbM));
+	//return l.has_on_positive_side(p(cp[1])) && l.has_on_negative_side(p(cp[0]));
+
+	return CGAL::left_turn(p(taM),p(cp[0]),p(tbM)) && CGAL::left_turn(p(tbM),p(cp[1]),p(taM));
 }
 
 void Tri::writeBack(const Triangle& tri) {
@@ -285,12 +346,19 @@ void Tri::writeBack(const Triangle& tri) {
 	tOUT.neighborlist[tri.id*3 + 2] = tri.diagonalNeighbor(tri.c);
 }
 
+/* returns the common two corners of ta, tb in the CCW order of 'ta' */
 std::array<ul,2> Tri::getCommonPair(const Triangle& ta, const Triangle& tb) const {
 	std::vector<ul> vect;
-	if(hasCorner(tb,ta.a)) {vect.push_back(ta.a);}
-	if(hasCorner(tb,ta.b)) {vect.push_back(ta.b);}
-	if(hasCorner(tb,ta.c)) {vect.push_back(ta.c);}
+	if(hasCorner(ta,tb.c)) {vect.push_back(tb.c);}
+	if(hasCorner(ta,tb.b)) {vect.push_back(tb.b);}
+	if(hasCorner(ta,tb.a)) {vect.push_back(tb.a);}
 	assert(vect.size() == 2);
+
+	Line l(p(vect[0]),p(vect[1]));
+	if(!l.has_on_positive_side( p( getMissingCorner(ta,vect[0],vect[1])) ) ) {
+		std::swap(vect[0],vect[1]);
+	}
+
 	return {{ vect[0],vect[1] }};
 }
 
@@ -301,6 +369,21 @@ Triangle Tri::getNextCCWTriangleAroundVertex(const Triangle& tri, ul vertex) con
 		return getTriangle(tri.nAB);
 	} else if(vertex == tri.c && tri.nBC != NIL) {
 		return getTriangle(tri.nBC);
+	}
+	if(config->verbose) {
+		LOG(INFO) << "getNextCCWTriangleAroundVertex failed for vertex " << vertex << " on tri: " << tri;
+
+		if(tri.nBC != NIL)  {
+			LOG(INFO) << "aN: " << getTriangle(tri.nBC);
+		}
+		if(tri.nCA != NIL)  {
+			LOG(INFO) << "bN: "  << getTriangle(tri.nCA);
+		}
+		if(tri.nAB != NIL)  {
+			LOG(INFO) << "cN: "  << getTriangle(tri.nAB);
+		}
+
+
 	}
 	assert(false);
 	return Triangle();

@@ -55,6 +55,7 @@ void Data::removePolygonCorner(EdgeIterator afterIt) {
 	basicInput.add_edge(eA[0],eA[1]);
 
 	/* fix reflex settings */
+	afterIt = prevEdge(afterIt);
 	IVreflex[ (*afterIt)[1] ] = isNextVertexReflex(afterIt);
 	afterIt = nextEdge(afterIt);
 	IVreflex[ (*afterIt)[1] ] = isNextVertexReflex(afterIt);
@@ -74,6 +75,9 @@ void Data::addPolygonCorner(EdgeIterator betweenIt, const ul& vertexIdx) {
 	polygon.insert(nextEdge(betweenIt), {{vertexIdx,targetIdx}} );
 
 	/* fix reflex settings */
+	betweenIt = prevEdge(betweenIt);
+	IVreflex[ (*betweenIt)[1] ] = isNextVertexReflex(betweenIt);
+	betweenIt = nextEdge(betweenIt);
 	IVreflex[ (*betweenIt)[1] ] = isNextVertexReflex(betweenIt);
 	betweenIt = nextEdge(betweenIt);
 	IVreflex[ (*betweenIt)[1] ] = isNextVertexReflex(betweenIt);
@@ -101,7 +105,6 @@ bool Data::isNextVertexReflex(EdgeIterator& it) {
 
 	return CGAL::right_turn(A,B,C);
 }
-
 
 
 bool Data::loadFile(const std::string& fileName) {
