@@ -17,12 +17,10 @@ void Tri::runTriangle(Data& data) {
 
 	/* triangulate */
 	triangulate(triswitches,&triangleIN,&tOUT,&vorout);
-
 	triangulationDone = true;
 }
 
 void Tri::aSingleFlip() {
-
 	if(!trisOnReflexVertex.empty()) {
 		/* obtain last triangle */
 		ul selectIdx = trisOnReflexVertex.back();
@@ -212,11 +210,17 @@ void Tri::aSingleFlip() {
 				if(outsideTrisToRepair.size() > 0) {
 					repairTriangulationOn(outsideTrisToRepair, vertex);
 				}
-				if(!config->silent) {std::cout << ".";}
+				if(!config->silent) {
+					if(flipCnt%1000 == 0) {
+						std::cout << flipCnt;
+					} else {
+						std::cout << ".";
+					}
+				}
 			}
 		}
 	} else {
-		if(--lookupTriangles > 0 && flipCnt > flipCheck) {
+		if(flipCnt > flipCheck) {
 			identifyTrisOnReflexInputVertices();
 			flipCheck = flipCnt;
 		} else {

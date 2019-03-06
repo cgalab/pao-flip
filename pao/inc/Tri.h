@@ -232,7 +232,6 @@ private:
 	bool triangulationDone = false;
 	bool flippingDone = false;
 
-	ul lookupTriangles = 100;
 	ul flipCnt = 0;
 	ul flipCheck = 0;
 
