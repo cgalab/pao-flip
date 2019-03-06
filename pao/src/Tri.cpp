@@ -212,6 +212,7 @@ void Tri::aSingleFlip() {
 				if(outsideTrisToRepair.size() > 0) {
 					repairTriangulationOn(outsideTrisToRepair, vertex);
 				}
+				if(!config->silent) {std::cout << ".";}
 			}
 		}
 	} else {

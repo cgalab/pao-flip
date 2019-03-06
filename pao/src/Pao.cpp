@@ -75,6 +75,8 @@ void Pao::run() {
 				tri.aSingleFlip();
 			}
 
+			if(!config.silent) {std::cout << std::endl;}
+
 			data->printPermutation();
 		}
 	} else {
