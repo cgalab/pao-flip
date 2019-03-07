@@ -104,6 +104,7 @@ public:
 		sort_tuple(u,v);
 		assert(has_edge(u,v));
 		auto findres = edge_map.find(VertexIdxPair(u,v));
+
 		auto edge = &edges_[findres->second];
 		edge->u = 0;
 		edge->v = 0;
@@ -118,6 +119,7 @@ public:
 
 		sort_tuple(u,v);
 		auto res = edge_map.emplace(std::pair<VertexIdxPair,ul>(VertexIdxPair(u,v), idx));
+		assert(res.second);
 
 		edge->u = u;
 		edge->v = v;
