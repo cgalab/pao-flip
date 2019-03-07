@@ -65,6 +65,11 @@ void Pao::run() {
 			LOG(INFO) << "reflex sensitive flipping ON...";
 		}
 
+		tri.setSortingStratey(config.enableSortingStrategy);
+		if(config.verbose && config.enableSortingStrategy)  {
+			LOG(INFO) << "sorting strategy ON...";
+		}
+
 //		data->writePolyToOptPoly();
 
 		if(config.verbose) {LOG(INFO) << "Testing Flips...";}

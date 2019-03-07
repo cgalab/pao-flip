@@ -38,7 +38,7 @@ paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * 
 	if(visible_triangles) {
 		painter->setPen(segmentsPen());
 		if(tri->isTriangulationDone()) {
-			for (ul i = 0; i < tri->getTriangleData()->numberoftriangles; ++i) {
+			for (ul i = 0; i < (ul)tri->getTriangleData()->numberoftriangles; ++i) {
 				auto edges = tri->getTriangleEdgesNotOnInput(i);
 				for(auto e : edges) {
 					painterostream << e;
@@ -100,7 +100,7 @@ updateBoundingBox() {
 	}
 
 	auto bb = tri->getPoint(0).bbox();
-	for (ul i = 0; i < tri->getTriangleData()->numberofpoints; ++i) {
+	for (ul i = 0; i < (ul)tri->getTriangleData()->numberofpoints; ++i) {
 		bb += tri->getPoint(i).bbox();
 	}
 

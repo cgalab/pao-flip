@@ -137,7 +137,7 @@ void Tri::aSingleFlip() {
 			} else {
 				/* check outside triangles */
 				Point check;
-				ul checkIdx;
+				ul checkIdx = ULMAX;
 				if(tri.a == vertex) {
 					checkIdx = tri.b;
 					check = data->v(tri.b);
@@ -178,9 +178,6 @@ void Tri::aSingleFlip() {
 		if(isValidVertex && triArea > 0.0) {
 			if( (maximizing && triArea < outSideArea) ||
 			   (!maximizing && triArea > outSideArea)) {
-				tri = getTriangle(triIdx);
-
-				//if(config->verbose) {std::cout << std::endl; data->printPermutation();}
 
 				if(config->verbose) {
 					std::cout << "looking good for " << vertex << std::endl;
@@ -188,43 +185,20 @@ void Tri::aSingleFlip() {
 					std::cout << "tri " << tri << std::endl;
 				}
 
-				edgeIt = data->prevEdge(edgeIt);
-				if(config->verbose) {
-					std::cout << "edgeit " << (*edgeIt)[0] << ", " << (*edgeIt)[1] << std::endl;
-				}
-				data->removePolygonCorner(edgeIt);
-
-				auto indexEdge = getBoundaryEdge(tri);
-
-				if(config->verbose) {
-					std::cout << "tri-b-edge " << indexEdge[0] << ", " << indexEdge[1] << std::endl;
-				}
-
-				auto edgeItA = data->findEdgeBefore(indexEdge[0]);
-				auto edgeItB = data->findEdgeBefore(indexEdge[1]);
-
-				if(data->isEqual(*edgeItB,indexEdge)) {
-					edgeItA = edgeItB;
-				}
-
-				data->addPolygonCorner(edgeItA, vertex);
-
+				/* 'flipping-the-polygon' */
+				tri = getTriangle(triIdx);
+				applyPolygonalFlip(tri,edgeIt, vertex);
 				++flipCnt;
 
-				if(config->verbose) {
-					//data->printPermutation();
-					LOG(INFO) << "flip " << flipCnt;
-				}
+				if(config->verbose) {LOG(INFO) << "flip " << flipCnt;}
 
 				if(outsideTrisToRepair.size() > 0) {
 					repairTriangulationOn(outsideTrisToRepair, vertex);
 				}
+
 				if(!config->silent) {
-					if(flipCnt%1000 == 0) {
-						std::cout << flipCnt;
-					} else {
-						std::cout << ".";
-					}
+					if(flipCnt%1000 == 0) {	std::cout << flipCnt; }
+					else {std::cout << ".";	}
 				}
 			}
 		}
@@ -236,6 +210,29 @@ void Tri::aSingleFlip() {
 			flippingDone = true;
 		}
 	}
+}
+
+void Tri::applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul vertex) {
+	edgeIt = data->prevEdge(edgeIt);
+	if(config->verbose) {
+		std::cout << "edgeit " << (*edgeIt)[0] << ", " << (*edgeIt)[1] << std::endl;
+	}
+	data->removePolygonCorner(edgeIt);
+
+	auto indexEdge = getBoundaryEdge(tri);
+
+	if(config->verbose) {
+		std::cout << "tri-b-edge " << indexEdge[0] << ", " << indexEdge[1] << std::endl;
+	}
+
+	auto edgeItA = data->findEdgeBefore(indexEdge[0]);
+	auto edgeItB = data->findEdgeBefore(indexEdge[1]);
+
+	if(data->isEqual(*edgeItB,indexEdge)) {
+		edgeItA = edgeItB;
+	}
+
+	data->addPolygonCorner(edgeItA, vertex);
 }
 
 bool Tri::isFlippable(const Triangle& tri, ul vertex) const {
@@ -259,7 +256,7 @@ bool Tri::isFlippable(const Triangle& tri, ul vertex) const {
 
 
 void Tri::identifyTrisOnReflexInputVertices() {
-	for(ul i=0; i < tOUT.numberoftriangles; ++i) {
+	for(ul i=0; i < (ul)tOUT.numberoftriangles; ++i) {
 		auto tri = getTriangle(i);
 		if(isTriOnBoundaryABAndReflexVertexC(tri)) {
 			trisOnReflexVertex.push_back(i);
@@ -312,7 +309,7 @@ void Tri::repairTriangulationOn(std::list<ul> tris, const ul vertex) {
 				++t2;
 			}
 		}
-		assert(checkCnt != tris.size());
+		assert(checkCnt != (sl)tris.size());
 	}
 }
 
@@ -523,7 +520,7 @@ void Tri::inittriangulateioOut(Data& data, triangulateio& tri) {
 
 
 void Tri::printTriangles() const {
-	for (ul i = 0; i < tOUT.numberoftriangles; ++i) {
+	for (ul i = 0; i < (ul)tOUT.numberoftriangles; ++i) {
 		Triangle t = getTriangle(i);
 		std::cout << t << " ";
 	}
@@ -533,12 +530,13 @@ void Tri::printTriangles() const {
 
 void Tri::printEdges() const {
 	std::cout << "edgelist idx: ";
-	for (ul i = 0; i < tOUT.numberofedges*2; ++i) {
+	for (ul i = 0; i < (ul)tOUT.numberofedges*2; ++i) {
 		std::cout << tOUT.edgelist[i] << ", ";
 	}
 	std::cout << std::endl;
 
-	std::cout << std::endl;for (ul i = 0; i < tOUT.numberofedges; ++i) {
+	std::cout << std::endl;
+	for (ul i = 0; i < (ul)tOUT.numberofedges; ++i) {
 		Edge e = getEdge(i);
 		std::cout << e << " / ";
 	}

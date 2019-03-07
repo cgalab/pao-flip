@@ -80,7 +80,7 @@ public:
 	bool isTriangulationDone() { return triangulationDone; }
 
 	Triangle getTriangle(ul idx) const {
-		assert(idx < tOUT.numberoftriangles);
+		assert(idx < (ul)tOUT.numberoftriangles);
 		return Triangle(idx,tOUT.trianglelist[idx*3],tOUT.trianglelist[idx*3 + 1],tOUT.trianglelist[idx*3 + 2],
 					    tOUT.neighborlist[idx*3 + 2],tOUT.neighborlist[idx*3],tOUT.neighborlist[idx*3 + 1]);
 	}
@@ -213,6 +213,7 @@ public:
 	void setMaximizingStrategy() {maximizing = true;}
 	void setMinimizingStrategy() {maximizing = false;}
 	void setReflexSensitive(bool rs) {isReflexSensitiveFlipping = rs;}
+	void setSortingStratey(bool rs) {sortingStrategyEnabled = rs;}
 
 	void printTriangles() const;
 	void printEdges() const;
@@ -223,6 +224,8 @@ public:
 private:
 	void filltriangulateioIn(Data& data, triangulateio& tri);
 	void inittriangulateioOut(Data& data, triangulateio& tri);
+
+	void applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul vertex);
 
 	triangulateio triangleIN, tOUT, vorout;
 	Data* data = nullptr;
@@ -237,6 +240,7 @@ private:
 
 	bool maximizing = true;
 	bool isReflexSensitiveFlipping = false;
+	bool sortingStrategyEnabled = false;
 
 	std::vector<int> trisOnReflexVertex;
 };
