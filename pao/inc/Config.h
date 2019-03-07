@@ -16,7 +16,7 @@ public:
  	, outputFileName("")
 	, validConfig(false) {
 		printOptions = "[-max|-min] [-h] [-v|-s] ";
-		printOptions += "[-r] [-sort] ";
+		printOptions += "[-r] [-sort|-rand] ";
 		printOptions += "[-poly|-obj <filename>] <filename>";
 	}
 
@@ -30,8 +30,9 @@ public:
 
 	void printHelpLong() const {
 		std::cout << "  -h \t\t\tprint this help" << std::endl
-			 << "  -max/-min \t\t maxmize or minimize polygon (default: max)" << std::endl
-			 << "  -sort \t\t enable sorting strategy (works with both min and max)" << std::endl
+			 << "  -max/-min \t\tmaxmize or minimize polygon (default: max)" << std::endl
+			 << "  -sort \t\tenable sorting strategy (works with both min and max)" << std::endl
+			 << "  -rand \t\trandomly access the vector of reflex vertices (not with -sort)" << std::endl
 			 << "  -r \t\t\tsome reflex sensitive flipping in the polygon" << std::endl
 			 << "  -v \t\t\tverbose mode, shows more information about the computation" << std::endl
 			 << "  -s \t\t\tsilent mode, shows no information" << std::endl
@@ -58,6 +59,7 @@ public:
 	bool 			maximize;
 	bool 			enableSortingStrategy = false;
 	bool 			reflexSensitiveFlipping = false;
+	bool			chooseByRandom = false;
 
 	std::string		outputFileName;
 

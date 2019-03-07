@@ -69,16 +69,27 @@ void Pao::run() {
 		if(config.verbose && config.enableSortingStrategy)  {
 			LOG(INFO) << "sorting strategy ON...";
 		}
+		tri.setRandomSelection(config.chooseByRandom);
+		if(config.verbose && config.chooseByRandom)  {
+			LOG(INFO) << "choose randomly ON...";
+		}
+		tri.setRandomSelection(config.chooseByRandom);
 
 //		data->writePolyToOptPoly();
 
-		if(config.verbose) {LOG(INFO) << "Testing Flips...";}
+		if(config.verbose) {LOG(INFO) << "Flipping...";}
 		tri.identifyTrisOnReflexInputVertices();
 
 		if(!config.gui) {
-			while(!tri.isFlippingDone()) {
-				tri.aSingleFlip();
-			}
+			sl retryCnt = (config.enableSortingStrategy) ? 10 : 0;
+			do {
+				while(!tri.isFlippingDone()) {
+					tri.aSingleFlip();
+				}
+				if(config.enableSortingStrategy) {
+					tri.resetForSortedFlipping();
+				}
+			} while(--retryCnt > 0);
 
 			if(!config.silent) {std::cout << std::endl;}
 

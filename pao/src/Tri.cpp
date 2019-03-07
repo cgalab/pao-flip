@@ -8,6 +8,10 @@ std::ostream& operator<<(std::ostream& os, const Triangle& dt) {
 bool operator==(const Triangle& a, const Triangle& b) {return a.id == b.id;}
 bool operator!=(const Triangle& a, const Triangle& b) {return a.id != b.id;}
 
+bool operator<(const FlipElement& lhs, const FlipElement& rhs) {
+  return lhs.areaChange < rhs.areaChange;
+}
+
 void Tri::runTriangle(Data& data) {
 	this->data = &data;
 
@@ -20,28 +24,66 @@ void Tri::runTriangle(Data& data) {
 	triangulationDone = true;
 }
 
-void Tri::aSingleFlip() {
-	if(!trisOnReflexVertex.empty()) {
-		/* obtain last triangle */
-		ul selectIdx = trisOnReflexVertex.back();
-		trisOnReflexVertex.pop_back();
+void Tri::resetForSortedFlipping() {
+	if(sortingStrategyEnabled) {
+		identifyTrisOnReflexInputVertices();
 
-		auto tri = getTriangle(selectIdx);
-		if(!triLiesOnReflexVertex(tri)) {
-			if(config->verbose) {
-				LOG(INFO) << "triangle " << tri << " no longer on reflex vertex.";
+		flippingDone = false;
+		sortingDone  = false;
+	}
+}
+
+void Tri::aSingleFlip() {
+	if(isStillSorting() && trisOnReflexVertex.empty()) {
+		sortingDone = true;
+	}
+
+	if(!trisOnReflexVertex.empty() || (sortingStrategyEnabled && !flipQueue.empty())) {
+
+		Triangle tri;
+		EdgeIterator edgeIt;
+		ul selectIdx, vertex;
+
+		if(!sortingStrategyEnabled || (sortingStrategyEnabled && !sortingDone)) {
+			/* obtain last triangle */
+
+			if(randomSelection) {
+				std::mt19937 gen(rd());
+				std::uniform_int_distribution<> dis(0, trisOnReflexVertex.size()-1);
+				ul pos = dis(gen);
+				selectIdx = trisOnReflexVertex[pos];
+				trisOnReflexVertex.erase(trisOnReflexVertex.begin() + pos);
+			} else {
+				selectIdx = trisOnReflexVertex.back();
+				trisOnReflexVertex.pop_back();
 			}
-			return;
+
+			tri = getTriangle(selectIdx);
+
+			if(!triLiesOnReflexVertex(tri)) {
+				if(config->verbose) {
+					LOG(INFO) << "triangle " << tri << " no longer on reflex vertex.";
+				}
+				return;
+			}
+			vertex = getReflexIndex(tri);
+		} else {
+			do {
+				/* we use sortingStrategy and we are done sorting */
+				auto top = flipQueue.top();
+				flipQueue.pop();
+				vertex = top.vertexIdx;
+			} while(!flipQueue.empty() && !data->isReflexVertex(vertex));
+			tri = findTriangleWithCorner(vertex);
 		}
-		ul vertex = getReflexIndex(tri);
+		edgeIt = data->findEdgeBefore(vertex);
+
 		if(!data->isReflexVertex(vertex)) {
 			if(config->verbose) {
 				LOG(INFO) << "vertex " << vertex << " no longer reflex.";
 			}
 			return;
 		}
-
-		auto edgeIt = data->findEdgeBefore(vertex);
 
 		if(!data->isNextVertexReflex(edgeIt)) {
 			LOG(ERROR) << "vertex not reflex?";
@@ -51,159 +93,61 @@ void Tri::aSingleFlip() {
 		assert(edgeIt != data->getPolygon().end());
 
 		IndexEdge a = *edgeIt;
-		edgeIt = data->nextEdge(edgeIt);
-		IndexEdge b = *edgeIt;
+		IndexEdge b = *(data->nextEdge(edgeIt));
 
 		if(config->verbose) {
-//			std::cout << "circle around: " << vertex << " edge vertices: " << a[0] << " "
-//					  << b[0] << " " << b[1] << std::endl;
-//			LOG(INFO) << "vertex: " << vertex;
+			std::cout << "circle around: " << vertex << " edge vertices: " << a[0] << " "
+					  << b[0] << " " << b[1] << std::endl;
+			LOG(INFO) << "vertex: " << vertex;
 		}
 
-		bool inPoly;
-		auto triStart = tri;
-		/********************************************************/
-		/* 		find out if we are inside or outside			*/
-		/********************************************************/
-		do {
-			if((tri.a == vertex && b[1] == tri.b) ||
-			   (tri.b == vertex && b[1] == tri.c) ||
-			   (tri.c == vertex && b[1] == tri.a) ) {
-				inPoly = true;
-				break;
-			}
-			if((tri.a == vertex && a[0] == tri.b) ||
-			   (tri.b == vertex && a[0] == tri.c) ||
-			   (tri.c == vertex && a[0] == tri.a) ) {
-				inPoly = false;
-				break;
-			}
-
-			tri = getNextCCWTriangleAroundVertex(tri,vertex);
-		} while( tri.id != triStart.id );
-
-
-		/********************************************************/
-		/* 		find out extreme triangle inside, check if		*/
-		/* 		outside is an ear.								*/
-		/********************************************************/
-		auto outSideArea = CGAL::area(data->v(a[0]),data->v(b[1]),data->v(b[0]));
-		Exact triArea = (maximizing) ? std::numeric_limits<Exact>::max() : 0.0;
-		ul triIdx = tri.id;
-
-		/* if a vertex is 'above' line a[0],b[1], vertex inside the outside ear */
-		bool isValidVertex = true;
-		Line referenceLine(data->v(a[0]),data->v(b[1]));
-
+		/*************************************************************/
+		/* iterates around 'vertex' and finds most extreme triangle  */
+		/*************************************************************/
+		ul triIdx = ULMAX;
 		std::list<ul> outsideTrisToRepair;
+		bool isValidVertex = getBestTriAroundVertex(vertex,tri,a,b, outsideTrisToRepair,triIdx);
 
-		triStart = tri;
-		do {
-			if((tri.a == vertex && b[1] == tri.b) ||
-			   (tri.b == vertex && b[1] == tri.c) ||
-			   (tri.c == vertex && b[1] == tri.a) ) {
-				inPoly = true;
-			}
-			if((tri.a == vertex && a[0] == tri.b) ||
-			   (tri.b == vertex && a[0] == tri.c) ||
-			   (tri.c == vertex && a[0] == tri.a) ) {
-				inPoly = false;
-			}
+		if(isValidVertex && triIdx != ULMAX) {
+			tri = getTriangle(triIdx);
+			Exact triArea = getArea(tri);
+			Exact outSideArea = CGAL::area(data->v(a[0]),data->v(b[1]),data->v(b[0]));
 
-			if(inPoly) {
-
-				/* add -r argument when running pao-flip to activat this option */
-				if(isReflexSensitiveFlipping) {
-					auto tri_prev = getNextCWTriangleAroundVertex(tri,vertex);
-					reflexSensitiveFlipping(tri,vertex);
-					tri = getNextCCWTriangleAroundVertex(tri_prev,vertex);
-				}
-
-				if(isFlippable(tri, vertex)) {
-					/* find max area triangle */
-					auto area = getArea(tri);
-					if(maximizing) {
-						if(area < triArea) {
-							triArea = area;
-							triIdx  = tri.id;
-						}
-					} else {
-						if(area > triArea) {
-							triArea = area;
-							triIdx  = tri.id;
-						}
-					}
-				}
-			} else {
-				/* check outside triangles */
-				Point check;
-				ul checkIdx = ULMAX;
-				if(tri.a == vertex) {
-					checkIdx = tri.b;
-					check = data->v(tri.b);
-				} else if(tri.b == vertex) {
-					checkIdx = tri.c;
-					check = data->v(tri.c);
-				} else if(tri.c == vertex) {
-					checkIdx = tri.a;
-					check = data->v(tri.a);
-				}
-				if(referenceLine.has_on_positive_side(check)) {
-					isValidVertex = false;
-				}
-				/* check for colinearity of external boundary vertex */
-				if(a[0] != checkIdx && b[1] != checkIdx &&
-						CGAL::collinear(p(a[0]),check,p(b[1]))) {
-					isValidVertex = false;
-				}
-
-				/* if outside tri is not a[0]a[1]b[1] */
-				if(!isOnVertices(tri,a[0],a[1],b[1])) {
-					if(config->verbose) {
-						//LOG(INFO) << "outside tri " << tri << " added to repair stack";
-					}
-					outsideTrisToRepair.push_back(tri.id);
-				}
-			}
-
-			tri = getNextCCWTriangleAroundVertex(tri,vertex);
-
-			if(config->verbose) {
-				//LOG(INFO) << "(while) tri it " << tri;
-			}
-
-		} while( tri.id != triStart.id && isValidVertex );
-
-		/* change polygon "flip" */
-		if(isValidVertex && triArea > 0.0) {
-			if( (maximizing && triArea < outSideArea) ||
-			   (!maximizing && triArea > outSideArea)) {
-
+			/*************************************************************/
+			/* with '-sort' we first sort int a priority queue 			 */
+			/* we do the actual flipping in an additional run 			 */
+			/*************************************************************/
+			if(isStillSorting()) {
 				if(config->verbose) {
-					std::cout << "looking good for " << vertex << std::endl;
-					std::cout << "area out: " << outSideArea << " in tri: " << triArea << std::endl;
-					std::cout << "tri " << tri << std::endl;
+					LOG(INFO) << "addeing vertex " << (*edgeIt)[1] << " to flipqueue!";
 				}
+				Exact areaMod = (triArea > outSideArea) ? triArea-outSideArea : outSideArea-triArea;
+				flipQueue.push( FlipElement(vertex,areaMod) );
+			} else {
+				/* update polygon "flip" (the actual flip) */
+				if( (maximizing && triArea < outSideArea) ||
+				   (!maximizing && triArea > outSideArea)) {
 
-				/* 'flipping-the-polygon' */
-				tri = getTriangle(triIdx);
-				applyPolygonalFlip(tri,edgeIt, vertex);
-				++flipCnt;
+					if(config->verbose) {
+						std::cout << "looking good for " << vertex ;
+						std::cout << " // area out: " << outSideArea << " in tri: " << triArea ;
+						std::cout << " // triangle " << tri << std::endl;
+					}
 
-				if(config->verbose) {LOG(INFO) << "flip " << flipCnt;}
+					/* 'flipping-the-polygon' */
+					applyPolygonalFlip(tri,edgeIt, vertex,outsideTrisToRepair);
+					++flipCnt;
 
-				if(outsideTrisToRepair.size() > 0) {
-					repairTriangulationOn(outsideTrisToRepair, vertex);
-				}
 
-				if(!config->silent) {
-					if(flipCnt%1000 == 0) {	std::cout << flipCnt; }
-					else {std::cout << ".";	}
+					if(!config->silent) {
+						if(flipCnt%1000 == 0) {	std::cout << flipCnt; }
+						else {std::cout << ".";	}
+					}
 				}
 			}
 		}
 	} else {
-		if(flipCnt > flipCheck) {
+		if(flipCnt > flipCheck && !sortingStrategyEnabled) {
 			identifyTrisOnReflexInputVertices();
 			flipCheck = flipCnt;
 		} else {
@@ -212,8 +156,133 @@ void Tri::aSingleFlip() {
 	}
 }
 
-void Tri::applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul vertex) {
-	edgeIt = data->prevEdge(edgeIt);
+bool Tri::getBestTriAroundVertex(const ul vertex, Triangle tri, const IndexEdge& a, const IndexEdge& b,
+		std::list<ul>& outsideTrisToRepair, ul& triIdxChosen) {
+
+	bool inPoly;
+	auto triStart = tri;
+
+	/********************************************************/
+	/* 		find out if we are inside or outside			*/
+	/********************************************************/
+	do {
+		if(haveEnteredPolyCCW(tri,b)) {inPoly = true;  break;}
+		if(haveLeftPolyCCW(tri,a)) 	  {inPoly = false; break;}
+
+		tri = getNextCCWTriangleAroundVertex(tri,vertex);
+	} while( tri.id != triStart.id );
+
+
+	/********************************************************/
+	/* 		find out extreme triangle inside, check if		*/
+	/* 		outside is an ear.								*/
+	/********************************************************/
+	auto outSideArea = CGAL::area(data->v(a[0]),data->v(b[1]),data->v(b[0]));
+	Exact triArea = (maximizing) ? std::numeric_limits<Exact>::max() : 0.0;
+
+	/* if a vertex is 'above' line a[0],b[1], vertex inside the outside ear */
+	bool isValidVertex = true;
+	Line referenceLine(data->v(a[0]),data->v(b[1]));
+
+	triStart = tri;
+	do {
+		if(haveEnteredPolyCCW(tri,b)) {inPoly = true;}
+		if(haveLeftPolyCCW(tri,a)) 	  {inPoly = false;}
+
+		if(inPoly) {
+			/* add -r argument when running pao-flip to activat this option */
+			if(isReflexSensitiveFlipping) {
+				auto tri_prev = getNextCWTriangleAroundVertex(tri,vertex);
+				reflexSensitiveFlipping(tri,vertex);
+				tri = getNextCCWTriangleAroundVertex(tri_prev,vertex);
+			}
+
+			if(isFlippable(tri, vertex)) {
+				/* find max area triangle */
+				auto area = getArea(tri);
+				if(maximizing) {
+					if(area < triArea) {
+						triArea = area;
+						triIdxChosen  = tri.id;
+					}
+				} else {
+					if(area > triArea) {
+						triArea = area;
+						triIdxChosen  = tri.id;
+					}
+				}
+			}
+		} else {
+			/* check outside triangles */
+			Point check;
+			ul checkIdx = ULMAX;
+			if(tri.a == vertex) {
+				checkIdx = tri.b;
+				check = data->v(tri.b);
+			} else if(tri.b == vertex) {
+				checkIdx = tri.c;
+				check = data->v(tri.c);
+			} else if(tri.c == vertex) {
+				checkIdx = tri.a;
+				check = data->v(tri.a);
+			}
+			if(referenceLine.has_on_positive_side(check)) {
+				isValidVertex = false;
+			}
+			/* check for collinearity of external boundary vertex */
+			if(a[0] != checkIdx && b[1] != checkIdx &&
+					CGAL::collinear(p(a[0]),check,p(b[1]))) {
+				isValidVertex = false;
+			}
+
+			/* if outside tri is not a[0]a[1]b[1] */
+			if(!isOnVertices(tri,a[0],a[1],b[1])) {
+				if(config->verbose) {
+					//LOG(INFO) << "outside tri " << tri << " added to repair stack";
+				}
+				outsideTrisToRepair.push_back(tri.id);
+			}
+		}
+
+		/* iterate around revlex 'vertex' triangle by triangle */
+		tri = getNextCCWTriangleAroundVertex(tri,vertex);
+
+	} while( tri.id != triStart.id && isValidVertex );
+
+	return isValidVertex;
+}
+
+
+Triangle Tri::findTriangleWithCorner(const ul idx) const {
+	for(sl i = 0; i < (sl) tOUT.numberoftriangles; ++i) {
+		auto tri = getTriangle(i);
+		if(hasCorner(tri,idx)) {
+			return tri;
+		}
+	}
+	assert(false);
+	return Triangle();
+}
+
+bool Tri::haveEnteredPolyCCW(const Triangle& tri, const IndexEdge& ie) const {
+	if((tri.a == ie[0] && ie[1] == tri.b) ||
+	   (tri.b == ie[0] && ie[1] == tri.c) ||
+	   (tri.c == ie[0] && ie[1] == tri.a) ) {
+		return true;
+	}
+	return false;
+}
+
+bool Tri::haveLeftPolyCCW(const Triangle& tri, const IndexEdge& ie) const {
+	if( (tri.a == ie[1] && ie[0] == tri.b) ||
+		(tri.b == ie[1] && ie[0] == tri.c) ||
+		(tri.c == ie[1] && ie[0] == tri.a) ) {
+			return true;
+	}
+	return false;
+}
+
+void Tri::applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul vertex, std::list<ul>& outsideTrisToRepair) {
 	if(config->verbose) {
 		std::cout << "edgeit " << (*edgeIt)[0] << ", " << (*edgeIt)[1] << std::endl;
 	}
@@ -225,14 +294,55 @@ void Tri::applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul 
 		std::cout << "tri-b-edge " << indexEdge[0] << ", " << indexEdge[1] << std::endl;
 	}
 
-	auto edgeItA = data->findEdgeBefore(indexEdge[0]);
-	auto edgeItB = data->findEdgeBefore(indexEdge[1]);
+	auto edgeItA = data->findEdgeIterator(indexEdge);
+	data->addPolygonCorner(edgeItA, vertex);
 
-	if(data->isEqual(*edgeItB,indexEdge)) {
-		edgeItA = edgeItB;
+	if(config->verbose) {LOG(INFO) << "flip " << flipCnt;}
+
+	if(outsideTrisToRepair.size() > 0) {
+		repairTriangulationOn(outsideTrisToRepair, vertex);
 	}
 
-	data->addPolygonCorner(edgeItA, vertex);
+	if(sortingStrategyEnabled) {
+		updateModifiedCorners(edgeIt,edgeItA);
+	}
+}
+
+
+
+void Tri::updateModifiedCorners(const EdgeIterator twoIncident, const EdgeIterator nextThree) {
+	assert(sortingStrategyEnabled);
+	/* update twoIncident [0] and [1] */
+	/* update nextThree [0] and [1] and next [0] */
+	for(ul vertex : {vA(twoIncident), vB(twoIncident), vA(nextThree), vB(nextThree), vA(data->nextEdge(nextThree))}) {
+
+		if(!data->isReflexVertex(vertex)) {continue;}
+
+		Triangle tri = findTriangleWithCorner(vertex);
+		auto edgeIt  = data->findEdgeBefore(vertex);
+		auto a 		 = *edgeIt;
+		auto b 		 = *(data->nextEdge(edgeIt));
+		ul triIdx 	 = ULMAX;
+		std::list<ul> outsideTrisToRepair;
+
+		bool isValidVertex = getBestTriAroundVertex(vertex,tri,a,b, outsideTrisToRepair,triIdx);
+
+		if(isValidVertex && triIdx != ULMAX) {
+			tri = getTriangle(triIdx);
+			Exact triArea = getArea(tri);
+			Exact outSideArea = CGAL::area(data->v(a[0]),data->v(b[1]),data->v(b[0]));
+
+			/*************************************************************/
+			/* with '-sort' we first sort int a priority queue 			 */
+			/* we do the actual flipping in an additional run 			 */
+			/*************************************************************/
+			if(config->verbose) {
+				LOG(INFO) << "addeing vertex " << (*edgeIt)[1] << " to flipqueue!";
+			}
+			Exact areaMod = (triArea > outSideArea) ? triArea-outSideArea : outSideArea-triArea;
+			flipQueue.push( FlipElement(vertex,areaMod) );
+		}
+	}
 }
 
 bool Tri::isFlippable(const Triangle& tri, ul vertex) const {
@@ -282,20 +392,19 @@ void Tri::repairTriangulationOn(std::list<ul> tris, const ul vertex) {
 				LOG(INFO) << "t2  " << getTriangle(*t2);
 			}
 
+			auto tri1 = getTriangle(*t1);
+			auto tri2 = getTriangle(*t2);
+
 			/* check if the two triangles form a convex quadrilateral */
-			if(isConvexQuad(getTriangle(*t1),getTriangle(*t2))) {
+			if(hasCorner(tri1,vertex) && hasCorner(tri2,vertex) && isConvexQuad(getTriangle(*t1),getTriangle(*t2))) {
 				/* if so we flip them */
 				flipPair( *t1, *t2 );
 
-				if(config->verbose) {
-					LOG(INFO) << "rt1 " << getTriangle(*t1);
-					LOG(INFO) << "rt2 " << getTriangle(*t2);
-					std::cout << std::endl;
-				}
+				tri1 = getTriangle(*t1);
+				tri2 = getTriangle(*t2);
 
 				/* find the triangle that is still connected to 'vertex'
 				 * and erase the other from the list 					*/
-				auto tri1 = getTriangle(*t1);
 				if(!hasCorner(tri1,vertex)) {
 					tris.erase(t1);
 					t1 = t2;
@@ -348,6 +457,13 @@ void Tri::flipPair(Triangle ta, Triangle tb) {
 
 	taNew.setNeighbors(tb.diagonalNeighbor(cp[1]),tb.id,ta.diagonalNeighbor(cp[1]));
 	tbNew.setNeighbors(ta.diagonalNeighbor(cp[0]),ta.id,tb.diagonalNeighbor(cp[0]));
+
+	if(config->verbose && (ta.id == 65 || ta.id==62)) {
+		LOG(INFO) << "Old ta: " << ta;
+		LOG(INFO) << "Old tb: " << tb;
+		LOG(INFO) << "New ta: " << taNew;
+		LOG(INFO) << "New tb: " << tbNew;
+	}
 
 	writeBack(taNew);
 	writeBack(tbNew);

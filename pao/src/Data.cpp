@@ -44,6 +44,27 @@ EdgeIterator Data::findEdgeBefore(const ul& vertexIndex) {
 	return polygon.end();
 }
 
+
+
+EdgeIterator Data::findEdgeIterator(const IndexEdge& ie)  {
+	auto edgeIt = findEdgeBefore(ie[0]);
+
+	if(!isEqual(*edgeIt,ie)) {
+		auto aNext = nextEdge(edgeIt);
+		auto aPrev = prevEdge(edgeIt);
+		if(isEqual( *aNext, ie) )  {
+			edgeIt = aNext;
+		} else if(isEqual( *aPrev, ie) )  {
+			edgeIt = aPrev;
+		} else {
+			assert(false);
+		}
+	}
+	return edgeIt;
+}
+
+
+
 void Data::removePolygonCorner(EdgeIterator afterIt) {
 	auto& eA = *afterIt;
 	auto& eB =  *nextEdge(afterIt);

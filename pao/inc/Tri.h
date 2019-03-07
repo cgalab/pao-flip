@@ -1,15 +1,19 @@
 #pragma once
 
-/* interact with triangle */
-
+#include <functional>
+#include <queue>
+#include <vector>
 #include <string>
 #include <assert.h>
+#include <iostream>
+#include <random>
 
 #include "Definitions.h"
 #include "Data.h"
 #include "Config.h"
 #include "cgTypes.h"
 
+/* interact with triangle */
 #ifdef __cplusplus
 extern "C" {
 	#include "../../triangle/triangle.h"
@@ -54,6 +58,18 @@ public:
 	friend bool operator!=(const Triangle& a, const Triangle& b);
 };
 
+class FlipElement {
+public:
+	FlipElement(const ul idx, const Exact area)
+	: vertexIdx(idx)
+	, areaChange(area) {}
+
+	ul 		vertexIdx;
+	Exact	areaChange;
+
+	friend bool operator<(const FlipElement& lhs, const FlipElement& rhs);
+};
+
 class Tri {
 public:
 	Tri() {
@@ -76,6 +92,8 @@ public:
 
 	void identifyTrisOnReflexInputVertices();
 
+	void resetForSortedFlipping();
+
 	bool isEmpty() { return tOUT.numberofpoints == 0; }
 	bool isTriangulationDone() { return triangulationDone; }
 
@@ -84,6 +102,8 @@ public:
 		return Triangle(idx,tOUT.trianglelist[idx*3],tOUT.trianglelist[idx*3 + 1],tOUT.trianglelist[idx*3 + 2],
 					    tOUT.neighborlist[idx*3 + 2],tOUT.neighborlist[idx*3],tOUT.neighborlist[idx*3 + 1]);
 	}
+
+	Triangle findTriangleWithCorner(const ul idx) const;
 
 	void writeBack(const Triangle& tri);
 
@@ -142,6 +162,8 @@ public:
 		return tri.a == a || tri.b == a || tri.c == a;
 	}
 
+	void updateModifiedCorners(const EdgeIterator twoIncident, const EdgeIterator nextThree);
+
 	bool isOnVertices(const Triangle& tri, const ul a, const ul b, const ul c) const {
 		return hasCorner(tri,a) &&  hasCorner(tri,b) && hasCorner(tri,c);
 	}
@@ -180,6 +202,8 @@ public:
 		return Point(tOUT.pointlist[idx*2], tOUT.pointlist[idx*2 + 1]);
 	}
 
+	ul vA(const EdgeIterator it) const {return (*it)[0];}
+	ul vB(const EdgeIterator it) const {return (*it)[1];}
 	Point p(const ul idx) const {return data->v(idx);}
 
 	const triangulateio* getTriangleData() const { return &tOUT; }
@@ -214,6 +238,7 @@ public:
 	void setMinimizingStrategy() {maximizing = false;}
 	void setReflexSensitive(bool rs) {isReflexSensitiveFlipping = rs;}
 	void setSortingStratey(bool rs) {sortingStrategyEnabled = rs;}
+	void setRandomSelection(bool rs) {randomSelection = rs;}
 
 	void printTriangles() const;
 	void printEdges() const;
@@ -225,7 +250,14 @@ private:
 	void filltriangulateioIn(Data& data, triangulateio& tri);
 	void inittriangulateioOut(Data& data, triangulateio& tri);
 
-	void applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul vertex);
+	bool getBestTriAroundVertex(const ul vertex, Triangle tri, const IndexEdge& a, const IndexEdge& b,
+			std::list<ul>& outsideTrisToRepair, ul& triIdxChosen);
+
+	void applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul vertex,
+			std::list<ul>& outsideTrisToRepair);
+
+	bool haveEnteredPolyCCW(const Triangle& tri, const IndexEdge& ie) const;
+	bool haveLeftPolyCCW(const Triangle& tri, const IndexEdge& ie) const;
 
 	triangulateio triangleIN, tOUT, vorout;
 	Data* data = nullptr;
@@ -235,12 +267,20 @@ private:
 	bool triangulationDone = false;
 	bool flippingDone = false;
 
-	ul flipCnt = 0;
+	ul flipCnt   = 0;
 	ul flipCheck = 0;
 
-	bool maximizing = true;
-	bool isReflexSensitiveFlipping = false;
-	bool sortingStrategyEnabled = false;
+	bool maximizing 				= true;
+	bool isReflexSensitiveFlipping 	= false;
+	bool randomSelection 			= false;
+	std::random_device rd;
 
 	std::vector<int> trisOnReflexVertex;
+
+	/* for sorting strategy '-sort' argument */
+	bool sortingStrategyEnabled = false;
+	bool sortingDone 			= false;
+    std::priority_queue<int, std::vector<FlipElement>> flipQueue;
+
+    bool isStillSorting() { return sortingStrategyEnabled && !sortingDone; }
 };

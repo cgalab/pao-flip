@@ -120,16 +120,24 @@ void MainWindow::on_actionEventStep_triggered() {
 			pao.tri.aSingleFlip();
 		}
 
-		scene.removeItem(input_gi.get());
-		scene.addItem(input_gi.get());
-
-		scene.removeItem(triangle_gi.get());
-		scene.addItem(triangle_gi.get());
-
 		if(pao.tri.isFlippingDone()) {
 			pao.data->printPermutation();
 		}
 	}
+
+	if(pao.tri.isFlippingDone() && pao.config.enableSortingStrategy && --retriesToSorting > 0) {
+		pao.tri.resetForSortedFlipping();
+		on_actionEventStep_triggered();
+		LOG(WARNING) << "Retry: " << retriesToSorting;
+		fflush(stdout);
+	}
+
+	scene.removeItem(input_gi.get());
+	scene.addItem(input_gi.get());
+
+	scene.removeItem(triangle_gi.get());
+	scene.addItem(triangle_gi.get());
+
 	time_changed();
 }
 
