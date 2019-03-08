@@ -77,7 +77,10 @@ void Tri::aSingleFlip() {
 		}
 
 		if(!data->isNextVertexReflex(edgeIt)) {
-			LOG(ERROR) << "vertex not reflex?";
+			data->setVertex(vertex,false);
+			if(config->verbose) {
+				LOG(ERROR) << "vertex not reflex?";
+			}
 			return;
 		}
 

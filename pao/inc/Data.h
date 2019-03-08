@@ -95,6 +95,7 @@ public:
 
 	void identifyConvexReflexInputVertices();
 
+	void setVertex(ul idx, bool reflex) {IVreflex[idx] = reflex;}
 
 private:
 	bool loadFile(const std::string& fileName);
