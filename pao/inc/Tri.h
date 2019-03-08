@@ -45,6 +45,21 @@ public:
 		return NIL;
 	}
 
+	ul getCWCorner(ul i) const {
+		assert(i!=a && i!=b && i!=c);
+		if(i == a) {return c;}
+		if(i == b) {return a;}
+		if(i == c) {return b;}
+		return ULMAX;
+	}
+	ul getCCWCorner(ul i) const {
+		assert(i!=a && i!=b && i!=c);
+		if(i == a) {return b;}
+		if(i == b) {return c;}
+		if(i == c) {return a;}
+		return ULMAX;
+	}
+
 	void updateNeibhorFromTo(sl nOld, sl nNew) {
 		if(nAB == nOld) {nAB=nNew;}
 		else if(nBC == nOld) {nBC=nNew;}
@@ -122,6 +137,7 @@ public:
 	}
 
 	bool isFlippable(const Triangle& tri, ul vertex) const;
+	bool isInvertable(const Triangle& tri, ul vertex) const;
 
 	IndexEdge getBoundaryEdge(const Triangle& tri) const {
 		if(data->hasEdge(tri.a,tri.b)) {
@@ -162,6 +178,7 @@ public:
 		return tri.a == a || tri.b == a || tri.c == a;
 	}
 
+	void updateModifiedCorner(const ul vertex);
 	void updateModifiedCorners(const EdgeIterator twoIncident, const EdgeIterator nextThree);
 
 	bool isOnVertices(const Triangle& tri, const ul a, const ul b, const ul c) const {
@@ -239,6 +256,7 @@ public:
 	void setReflexSensitive(bool rs) {isReflexSensitiveFlipping = rs;}
 	void setSortingStratey(bool rs)  {sortingStrategyEnabled = rs;   }
 	void setRandomSelection(bool rs) {randomSelection = rs;          }
+	void setInverterSelection(bool rs) {inverterEnabled = rs;          }
 
 	void printTriangles() const;
 	void printEdges() const;
@@ -272,6 +290,7 @@ private:
 
 	bool maximizing 				= true;
 	bool isReflexSensitiveFlipping 	= false;
+	bool inverterEnabled			= false;
 	bool randomSelection 			= false;
 	std::random_device rd;
 

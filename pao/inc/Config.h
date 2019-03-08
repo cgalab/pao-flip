@@ -33,6 +33,7 @@ public:
 			 << "  -max/-min \t\tmaxmize or minimize polygon (default: max)" << std::endl
 			 << "  -sort \t\tenable sorting strategy (works with both min and max)" << std::endl
 			 << "  -rand \t\trandomly access the vector of reflex vertices (not with -sort)" << std::endl
+			 << "  -invert \t\talso enable inverter (weasel's strategy)" << std::endl
 			 << "  -r \t\t\tsome reflex sensitive flipping in the polygon" << std::endl
 			 << "  -v \t\t\tverbose mode, shows more information about the computation" << std::endl
 			 << "  -s \t\t\tsilent mode, shows no information" << std::endl
@@ -57,9 +58,11 @@ public:
 	bool 			gui;
 
 	bool 			maximize;
-	bool 			enableSortingStrategy = false;
+	bool 			enableSortingStrategy 	= false;
 	bool 			reflexSensitiveFlipping = false;
-	bool			chooseByRandom = false;
+	bool			chooseByRandom 			= false;
+
+	bool			inverterEnabled 		= false;
 
 	std::string		outputFileName;
 

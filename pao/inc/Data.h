@@ -65,6 +65,7 @@ public:
 
 	void removePolygonCorner(EdgeIterator afterIt);
 	void addPolygonCorner(EdgeIterator betweenIt, const ul& vertexIdx);
+	void invertEdge(EdgeIterator edgeIt);
 
 	bool isNextVertexReflex(EdgeIterator& it);
 
@@ -94,6 +95,7 @@ public:
 
 	void identifyConvexReflexInputVertices();
 
+
 private:
 	bool loadFile(const std::string& fileName);
 
@@ -109,6 +111,6 @@ private:
 	Polygon 			polygon;
 //	ListPolygon			optPoly;
 
-	GMLGraph			gml;
 	BasicInput			basicInput;
+	GMLGraph			gml;
 };

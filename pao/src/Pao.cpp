@@ -69,11 +69,16 @@ void Pao::run() {
 		if(config.verbose && config.enableSortingStrategy)  {
 			LOG(INFO) << "sorting strategy ON...";
 		}
+
 		tri.setRandomSelection(config.chooseByRandom);
 		if(config.verbose && config.chooseByRandom)  {
 			LOG(INFO) << "choose randomly ON...";
 		}
-		tri.setRandomSelection(config.chooseByRandom);
+
+		tri.setInverterSelection(config.inverterEnabled);
+		if(config.verbose && config.inverterEnabled)  {
+			LOG(INFO) << "inversions (also) ON...";
+		}
 
 //		data->writePolyToOptPoly();
 

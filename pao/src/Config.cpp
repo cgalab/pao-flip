@@ -28,6 +28,8 @@ bool Config::evaluateArguments(std::list<std::string> args) {
 				maximize 		= false;
 			} else if (argument == "-r") {
 				reflexSensitiveFlipping = true;
+			} else if (argument == "-invert") {
+				inverterEnabled = true;
 			} else if (argument == "-sort") {
 				if(chooseByRandom) {
 					std::cout << "choose -rand or -sort, now -rand is enabled" << std::endl;

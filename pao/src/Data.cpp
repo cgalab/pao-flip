@@ -63,6 +63,24 @@ EdgeIterator Data::findEdgeIterator(const IndexEdge& ie)  {
 	return edgeIt;
 }
 
+/* the edge referenced by 'edgeIt' is flipped */
+void Data::invertEdge(EdgeIterator edgeIt) {
+	IndexEdge& edgeA = *prevEdge(edgeIt);
+	IndexEdge& edgeB = *edgeIt;
+	IndexEdge& edgeC = *nextEdge(edgeIt);
+
+	/* update basicInput DS */
+	auto ea = basicInput.get_edge(edgeA[0],edgeA[1]);
+	auto ec = basicInput.get_edge(edgeC[0],edgeC[1]);
+	basicInput.update_edge(ea.id,edgeA[0],edgeB[1]);
+	basicInput.update_edge(ec.id,edgeB[0],edgeC[1]);
+
+	/* update indexEdges in 'polygon' */
+	std::swap(edgeB[0],edgeB[1]);
+	edgeA[1] = edgeB[0];
+	edgeC[0] = edgeB[1];
+}
+
 
 
 void Data::removePolygonCorner(EdgeIterator afterIt) {
