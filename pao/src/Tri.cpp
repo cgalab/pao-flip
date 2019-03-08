@@ -58,12 +58,6 @@ void Tri::aSingleFlip() {
 				trisOnReflexVertex.pop_back();
 			}
 
-			if(!triLiesOnReflexVertex(tri)) {
-				if(config->verbose) {
-					LOG(INFO) << "triangle " << tri << " no longer on reflex vertex.";
-				}
-				return;
-			}
 		} else {
 			do {
 				/* we use sortingStrategy and we are done sorting */
