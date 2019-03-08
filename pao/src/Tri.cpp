@@ -51,14 +51,12 @@ void Tri::aSingleFlip() {
 				std::mt19937 gen(rd());
 				std::uniform_int_distribution<> dis(0, trisOnReflexVertex.size()-1);
 				ul pos = dis(gen);
-				selectIdx = trisOnReflexVertex[pos];
+				vertex = trisOnReflexVertex[pos];
 				trisOnReflexVertex.erase(trisOnReflexVertex.begin() + pos);
 			} else {
-				selectIdx = trisOnReflexVertex.back();
+				vertex = trisOnReflexVertex.back();
 				trisOnReflexVertex.pop_back();
 			}
-
-			tri = getTriangle(selectIdx);
 
 			if(!triLiesOnReflexVertex(tri)) {
 				if(config->verbose) {
@@ -66,7 +64,6 @@ void Tri::aSingleFlip() {
 				}
 				return;
 			}
-			vertex = getReflexIndex(tri);
 		} else {
 			do {
 				/* we use sortingStrategy and we are done sorting */
@@ -74,8 +71,8 @@ void Tri::aSingleFlip() {
 				flipQueue.pop();
 				vertex = top.vertexIdx;
 			} while(!flipQueue.empty() && !data->isReflexVertex(vertex));
-			tri = findTriangleWithCorner(vertex);
 		}
+		tri = findTriangleWithCorner(vertex);
 		edgeIt = data->findEdgeBefore(vertex);
 
 		if(!data->isReflexVertex(vertex)) {
@@ -366,12 +363,17 @@ bool Tri::isFlippable(const Triangle& tri, ul vertex) const {
 
 
 void Tri::identifyTrisOnReflexInputVertices() {
-	for(ul i=0; i < (ul)tOUT.numberoftriangles; ++i) {
-		auto tri = getTriangle(i);
-		if(isTriOnBoundaryABAndReflexVertexC(tri)) {
-			trisOnReflexVertex.push_back(i);
+	for(auto i : data->getPolygon()) {
+		if(data->isReflexVertex(i[1])) {
+			trisOnReflexVertex.push_back(i[1]);
 		}
 	}
+//	for(ul i=0; i < (ul)tOUT.numberoftriangles; ++i) {
+//		auto tri = getTriangle(i);
+//		if(isTriOnBoundaryABAndReflexVertexC(tri)) {
+//			trisOnReflexVertex.push_back(i);
+//		}
+//	}
 }
 
 Exact Tri::getArea(const Triangle& tri) const {

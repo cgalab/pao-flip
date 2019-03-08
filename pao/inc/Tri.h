@@ -232,19 +232,19 @@ public:
 
 	bool isConvexQuad(const Triangle& ta, const Triangle& tb) const;
 
-	void setConfig(Config* config_) {config = config_;}
+	void setConfig(Config* config_)  {config = config_;}
 
-	void setMaximizingStrategy() {maximizing = true;}
-	void setMinimizingStrategy() {maximizing = false;}
+	void setMaximizingStrategy() 	 {maximizing = true;}
+	void setMinimizingStrategy() 	 {maximizing = false;}
 	void setReflexSensitive(bool rs) {isReflexSensitiveFlipping = rs;}
-	void setSortingStratey(bool rs) {sortingStrategyEnabled = rs;}
-	void setRandomSelection(bool rs) {randomSelection = rs;}
+	void setSortingStratey(bool rs)  {sortingStrategyEnabled = rs;   }
+	void setRandomSelection(bool rs) {randomSelection = rs;          }
 
 	void printTriangles() const;
 	void printEdges() const;
 
 	bool isFlippingDone() {return flippingDone; }
-	ul getFlipCnt() const {return flipCnt;}
+	ul getFlipCnt() const {return flipCnt;		}
 
 private:
 	void filltriangulateioIn(Data& data, triangulateio& tri);
