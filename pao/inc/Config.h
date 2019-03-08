@@ -15,8 +15,8 @@ public:
 	, maximize(true)
  	, outputFileName("")
 	, validConfig(false) {
-		printOptions = "[-max|-min] [-h] [-v|-s] ";
-		printOptions += "[-r] [-sort|-rand] ";
+		printOptions =  "[-h] [-max|-min] [-v|-s] ";
+		printOptions += "[-r] [-sort|-rand] [-invert] [-area <AREA>] ";
 		printOptions += "[-poly|-obj <filename>] <filename>";
 	}
 
@@ -34,10 +34,10 @@ public:
 			 << "  -sort \t\tenable sorting strategy (works with both min and max)" << std::endl
 			 << "  -rand \t\trandomly access the vector of reflex vertices (not with -sort)" << std::endl
 			 << "  -invert \t\talso enable inverter (weasel's strategy)" << std::endl
-			 << "  -r \t\t\tsome reflex sensitive flipping in the polygon" << std::endl
+			 << "  -area <AREA> \t\tstate an area bound that has to be beaten" << std::endl
+			 << "  -r \t\t\tenable reflex sensitive flipping in the polygon" << std::endl
 			 << "  -v \t\t\tverbose mode, shows more information about the computation" << std::endl
 			 << "  -s \t\t\tsilent mode, shows no information" << std::endl
-			 << "  -l \t\t\tlogging verbose output to <filename>.log" << std::endl
 			 << "  -obj <file> \t\twrite output in wavefront obj format (3D coordinates)" << std::endl
 			 << "  <filename> \t\tinput type can be .gml (GraphML) or .obj (Wavefront Object)" << std::endl;
 	}
@@ -63,6 +63,9 @@ public:
 	bool			chooseByRandom 			= false;
 
 	bool			inverterEnabled 		= false;
+
+	bool			isAreaBoundSet			= false;
+	long double		areaBound				= 0.0;
 
 	std::string		outputFileName;
 

@@ -28,9 +28,13 @@ wavefront .obj file).
 |  -h           |         print this help |
 |  -v           |         verbose mode, shows more information about the computation |
 |  -s           |         silent mode, keep the output quiet except for the final permutation |
-|  -r           |         switch reflex sensitive flipping ON |
-|  -min,-max    |         computes a smaller/larger poylgon (default max) |
-|  -obj      |            write output in wavefront obj format (3D coordinates) |
+|  -min,-max    |         computes a smaller/larger polygon (default max) |
+|  -r           |         enable reflex sensitive flipping |
+|-sort          |         enable sorting strategy (works with both min and max) |
+|  -rand        |         randomly access the vector of reflex vertices (not together with -sort)|
+|  -invert      |         enable inverter (weasel's strategy)|
+|  -area <AREA> |         state an area bound that has to be beaten| 
+|  -obj         |            write output in wavefront obj format (3D coordinates) |
 |  &lt;filename&gt; |           input type is either wavefront obj or GML format |
 
 # Submodules

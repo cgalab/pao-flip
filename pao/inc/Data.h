@@ -93,6 +93,8 @@ public:
 
 	}
 
+	Exact getPolygonArea() const;
+
 	void identifyConvexReflexInputVertices();
 
 	void setVertex(ul idx, bool reflex) {IVreflex[idx] = reflex;}

@@ -98,7 +98,24 @@ void Pao::run() {
 
 			if(!config.silent) {std::cout << std::endl;}
 
-			data->printPermutation();
+			bool printPolygon = true;
+
+			if(config.isAreaBoundSet) {
+				auto area = data->getPolygonArea();
+				if(config.maximize && area > config.areaBound) {
+					printPolygon = true;
+				}
+				if(!config.maximize && area < config.areaBound) {
+					printPolygon = true;
+				}
+				if(config.verbose) {
+					LOG(INFO) << "area-change: " << std::abs(config.areaBound - area);
+				}
+			}
+
+			if(printPolygon) {
+				data->printPermutation();
+			}
 		}
 	} else {
 		if(config.verbose) {LOG(ERROR) << "Pao::run no valid config!";}

@@ -32,11 +32,13 @@
 
 #include <CGAL/intersections.h>
 #include <CGAL/squared_distance_2.h>
+#include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_2_algorithms.h>
 
 //using K 			 = CGAL::Exact_predicates_exact_constructions_kernel_with_sqrt;
 using K 			 = CGAL::Simple_cartesian<double>;
 
+using Vector3        = K::Vector_3;
 using Vector         = K::Vector_2;
 using Point          = K::Point_2;
 using Line           = K::Line_2;

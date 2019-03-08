@@ -28,6 +28,15 @@ bool Config::evaluateArguments(std::list<std::string> args) {
 				maximize 		= false;
 			} else if (argument == "-r") {
 				reflexSensitiveFlipping = true;
+			} else if (argument == "-area") {
+				isAreaBoundSet = true;
+				if(args.empty()) {
+					std::cout << "use -area <AREA>" << std::endl;
+					return false;
+				}
+				argument = args.front();
+				args.pop_front();
+				areaBound = std::atof(argument.c_str());
 			} else if (argument == "-invert") {
 				inverterEnabled = true;
 			} else if (argument == "-sort") {

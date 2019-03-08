@@ -257,6 +257,30 @@ bool Data::parsePOLY(const std::vector<std::string>& lines) {
 	return false;
 }
 
+Exact Data::getPolygonArea() const {
+	Exact xMin=0, yMin=0;
+	for(auto p : inputVertices) {
+		if(p.x() < xMin) {xMin = p.x();}
+		if(p.y() < yMin) {yMin = p.y();}
+	}
+	xMin-=10; yMin-=10;
+	Point offset(xMin,yMin);
+
+	Exact area = 0.0;
+	for(ul i=0 ; i <polygon.size(); ++i) {
+
+		Point Pa = eA(i);
+		Point Pb = eB(i);
+
+		Vector a( Pa.x()+offset.x() ,  Pa.y()+offset.y());
+		Vector b( Pb.x()+offset.x() ,  Pb.y()+offset.y());
+
+		area += (0.5 * CGAL::determinant(a,b));
+	}
+
+	return area;
+}
+
 //void Data::writePolyToOptPoly() {
 //	for(auto e : polygon) {
 //		optPoly.push_back(e);
