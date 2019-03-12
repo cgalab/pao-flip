@@ -83,30 +83,57 @@ void Pao::run() {
 //		data->writePolyToOptPoly();
 
 		if(config.verbose) {LOG(INFO) << "Flipping...";}
-		tri.identifyTrisOnReflexInputVertices();
+		std::vector<EdgeIterator> list = data->identifiyReflexVertices();
+		tri.setReflexVertices(list);
 
 		if(!config.gui) {
-			sl retryCnt = (config.enableSortingStrategy) ? 10 : 0;
-			do {
+
+				auto cnt = tri.getFlipCnt();
+
 				while(!tri.isFlippingDone()) {
-					tri.aSingleFlip();
+
+					cnt = tri.getFlipCnt();
+
+					while(tri.hasReflexVertices() || (config.enableSortingStrategy && !tri.isFlipQueueEmpty())) {
+						tri.aSingleFlip();
+					}
+
+					if(!config.enableSortingStrategy && cnt < tri.getFlipCnt()) {
+						list = data->identifiyReflexVertices();
+						tri.setReflexVertices(list);
+						if(config.verbose) {
+							LOG(INFO) << "refill reflex vertex list";
+						}
+					} else {
+						tri.setFlippingDone();
+					}
+
+					if(config.enableSortingStrategy && cnt < tri.getFlipCnt()) {
+						tri.resetForSortedFlipping();
+					}
 				}
-				if(config.enableSortingStrategy) {
-					tri.resetForSortedFlipping();
-				}
-			} while(--retryCnt > 0);
+
 
 			if(!config.silent) {std::cout << std::endl;}
 
 			bool printPolygon = true;
 
+			Exact area = 0.0;
+
 			if(config.isAreaBoundSet) {
-				auto area = data->getPolygonArea();
-				if(config.maximize && area > config.areaBound) {
+				printPolygon = false;
+
+				area = data->getPolygonArea();
+
+				if(config.areaBound == 0) {
 					printPolygon = true;
-				}
-				if(!config.maximize && area < config.areaBound) {
-					printPolygon = true;
+				} else {
+					if(config.maximize && area > config.areaBound) {
+						printPolygon = true;
+					}
+					if(!config.maximize && area < config.areaBound) {
+						printPolygon = true;
+					}
 				}
 				if(config.verbose) {
 					LOG(INFO) << "area-change: " << std::abs(config.areaBound - area);
@@ -115,6 +142,9 @@ void Pao::run() {
 
 			if(printPolygon) {
 				data->printPermutation();
+				if(config.isAreaBoundSet) {
+					std::cout <<  std::setprecision(20) << area << std::endl;
+				}
 			}
 		}
 	} else {

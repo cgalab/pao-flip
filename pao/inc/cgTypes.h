@@ -56,7 +56,7 @@ using ListPolygon  		= std::list<IndexEdge>;
 using EdgeList  		= std::vector<IndexEdge>;
 using PointIterator 	= std::vector<Point,std::allocator<Point>>::const_iterator;
 
-using EdgeIterator = std::vector<IndexEdge,std::allocator<IndexEdge>>::iterator;
+using EdgeIterator =  std::vector<IndexEdge>::iterator;
 
 #include "gml/BasicInput.h"
 

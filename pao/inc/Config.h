@@ -65,7 +65,7 @@ public:
 	bool			inverterEnabled 		= false;
 
 	bool			isAreaBoundSet			= false;
-	long double		areaBound				= 0.0;
+	long long		areaBound				= 0.0;
 
 	std::string		outputFileName;
 

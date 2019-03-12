@@ -48,6 +48,8 @@ MainWindow::MainWindow(const std::string& title, Pao& pao) :
 	ui->statusBar->addWidget(time_label, 0);
 	ui->statusBar->addWidget(xycoord, 0);
 
+	flipCntCheck = pao.tri.getFlipCnt();
+
 	time_changed();
 	on_actionResize_triggered();
 }
@@ -114,22 +116,30 @@ void MainWindow::time_changed() {
 void MainWindow::on_actionEventStep_triggered() {
 	if(!pao.config.isValid()) {return;}
 
-	if(!pao.tri.isFlippingDone()) {
-		auto cnt = pao.tri.getFlipCnt();
-		while(!pao.tri.isFlippingDone() && cnt == pao.tri.getFlipCnt()) {
-			pao.tri.aSingleFlip();
-		}
+	auto cnt = pao.tri.getFlipCnt();
 
-		if(pao.tri.isFlippingDone()) {
-			pao.data->printPermutation();
+	if(!pao.tri.isFlippingDone()) {
+		while( ( pao.tri.hasReflexVertices() || (pao.config.enableSortingStrategy && !pao.tri.isFlipQueueEmpty()))
+				&& cnt == pao.tri.getFlipCnt()) {
+			pao.tri.aSingleFlip();
 		}
 	}
 
-	if(pao.tri.isFlippingDone() && pao.config.enableSortingStrategy && --retriesToSorting > 0) {
+	if(!pao.tri.hasReflexVertices() && pao.tri.getFlipCnt() > flipCntCheck && !pao.config.enableSortingStrategy) {
+		/* rebuild reflex list and keep going */
+		auto list = pao.data->identifiyReflexVertices();
+		pao.tri.setReflexVertices(list);
+		flipCntCheck = pao.tri.getFlipCnt();
+	}
+
+	if(pao.config.enableSortingStrategy && pao.tri.isFlipQueueEmpty() && pao.tri.getFlipCnt() > flipCntCheck) {
 		pao.tri.resetForSortedFlipping();
-		on_actionEventStep_triggered();
-		LOG(WARNING) << "Retry: " << retriesToSorting;
-		fflush(stdout);
+		flipCntCheck = pao.tri.getFlipCnt();
+		LOG(WARNING) << "Retry";
+	}
+
+	if(!pao.tri.hasReflexVertices() && pao.tri.isFlipQueueEmpty()) {
+		pao.tri.setFlippingDone();
 	}
 
 	scene.removeItem(input_gi.get());
@@ -137,6 +147,11 @@ void MainWindow::on_actionEventStep_triggered() {
 
 	scene.removeItem(triangle_gi.get());
 	scene.addItem(triangle_gi.get());
+
+	if(pao.tri.isFlippingDone() && !did_finish) {
+		pao.data->printPermutation();
+		did_finish = true;
+	}
 
 	time_changed();
 }

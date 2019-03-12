@@ -21,7 +21,7 @@ wavefront .obj file).
 
 # Usage
 
-<code>pao [-h] [-v|-s] [-r] [-min|-max] [-obj &lt;filename&gt;] &lt;filename&gt;</code>
+<code>pao [-h] [-v|-s] [-r] [-min|-max] [-area &lt;AREA&gt;] [-obj &lt;filename&gt;] &lt;filename&gt;</code>
 
 | options        | description           |
 | -------------:|:------------- |
@@ -33,7 +33,7 @@ wavefront .obj file).
 |-sort          |         enable sorting strategy (works with both min and max) |
 |  -rand        |         randomly access the vector of reflex vertices (not together with -sort)|
 |  -invert      |         enable inverter (weasel's strategy)|
-|  -area <AREA> |         state an area bound that has to be beaten| 
+|  -area &lt;AREA&gt; |         state an area bound that has to be beaten| 
 |  -obj         |            write output in wavefront obj format (3D coordinates) |
 |  &lt;filename&gt; |           input type is either wavefront obj or GML format |
 

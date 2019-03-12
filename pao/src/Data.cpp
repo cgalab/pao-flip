@@ -79,6 +79,17 @@ void Data::invertEdge(EdgeIterator edgeIt) {
 	std::swap(edgeB[0],edgeB[1]);
 	edgeA[1] = edgeB[0];
 	edgeC[0] = edgeB[1];
+
+	/* update reflex DS */
+	auto preEdgeAIt = prevEdge(prevEdge(edgeIt));
+	auto edgeAIt = prevEdge(edgeIt);
+	auto edgeBIt = edgeIt;
+	auto edgeCIt = nextEdge(edgeIt);
+
+	setVertex(edgeA[0], isNextVertexReflex( preEdgeAIt ) );
+	setVertex(edgeA[1], isNextVertexReflex( edgeAIt ) );
+	setVertex(edgeB[1], isNextVertexReflex( edgeBIt ) );
+	setVertex(edgeC[1], isNextVertexReflex( edgeCIt ) );
 }
 
 
@@ -145,6 +156,15 @@ bool Data::isNextVertexReflex(EdgeIterator& it) {
 	return CGAL::right_turn(A,B,C);
 }
 
+std::vector<EdgeIterator> Data::identifiyReflexVertices() {
+	std::vector<EdgeIterator> list;
+	for(EdgeIterator i = polygon.begin(); i != polygon.end(); ++i) {
+		if(isReflexVertex((*i)[1])) {
+			list.push_back(i);
+		}
+	}
+	return list;
+}
 
 bool Data::loadFile(const std::string& fileName) {
 	if(fileExists(fileName)) {

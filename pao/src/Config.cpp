@@ -30,13 +30,19 @@ bool Config::evaluateArguments(std::list<std::string> args) {
 				reflexSensitiveFlipping = true;
 			} else if (argument == "-area") {
 				isAreaBoundSet = true;
-				if(args.empty()) {
-					std::cout << "use -area <AREA>" << std::endl;
-					return false;
-				}
+
 				argument = args.front();
-				args.pop_front();
-				areaBound = std::atof(argument.c_str());
+
+				if(!argument.empty() && argument.find_first_not_of("0123456789") == std::string::npos) {
+					args.pop_front();
+					areaBound = std::stoll(argument);
+				} else {
+					areaBound = 0;
+					if(verbose && !silent) {
+						std::cout << "no area provided!" << std::endl;
+					}
+				}
+
 			} else if (argument == "-invert") {
 				inverterEnabled = true;
 			} else if (argument == "-sort") {

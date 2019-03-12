@@ -75,15 +75,22 @@ public:
 
 class FlipElement {
 public:
-	FlipElement(const ul idx, const Exact area)
-	: vertexIdx(idx)
+	FlipElement(const EdgeIterator eidx, const Exact area)
+	: edgeIt(eidx)
 	, areaChange(area) {}
 
-	ul 		vertexIdx;
-	Exact	areaChange;
+	EdgeIterator 	edgeIt;
+	Exact			areaChange;
 
 	friend bool operator<(const FlipElement& lhs, const FlipElement& rhs);
 };
+
+struct CompareFlipElement : public std::binary_function<FlipElement, FlipElement, bool> {
+	bool operator()(const FlipElement& lhs, const FlipElement& rhs) const {
+		return lhs.areaChange < rhs.areaChange;
+	}
+};
+
 
 class Tri {
 public:
@@ -104,8 +111,6 @@ public:
 	void runTriangle(Data& data);
 
 	void aSingleFlip();
-
-	void identifyTrisOnReflexInputVertices();
 
 	void resetForSortedFlipping();
 
@@ -178,7 +183,7 @@ public:
 		return tri.a == a || tri.b == a || tri.c == a;
 	}
 
-	void updateModifiedCorner(const ul vertex);
+	void updateModifiedCorner(const EdgeIterator edgeIt);
 	void updateModifiedCorners(const EdgeIterator twoIncident, const EdgeIterator nextThree);
 
 	bool isOnVertices(const Triangle& tri, const ul a, const ul b, const ul c) const {
@@ -261,8 +266,15 @@ public:
 	void printTriangles() const;
 	void printEdges() const;
 
-	bool isFlippingDone() {return flippingDone; }
+	void setFlippingDone() {flippingDone = true;}
+	bool isFlippingDone() const {return flippingDone; }
 	ul getFlipCnt() const {return flipCnt;		}
+	bool hasReflexVertices() const {return !allReflexVertices.empty();}
+
+	bool isStillSorting() const { return sortingStrategyEnabled && !sortingDone; }
+	bool isSortingDone() const { return sortingDone; }
+	bool isFlipQueueEmpty() const {return flipQueue.empty();}
+	void setReflexVertices(std::vector<EdgeIterator> list) {allReflexVertices = list;}
 
 private:
 	void filltriangulateioIn(Data& data, triangulateio& tri);
@@ -285,8 +297,8 @@ private:
 	bool triangulationDone = false;
 	bool flippingDone = false;
 
+	std::vector<EdgeIterator> allReflexVertices;
 	ul flipCnt   = 0;
-	ul flipCheck = 0;
 
 	bool maximizing 				= true;
 	bool isReflexSensitiveFlipping 	= false;
@@ -294,12 +306,10 @@ private:
 	bool randomSelection 			= false;
 	std::random_device rd;
 
-	std::vector<int> trisOnReflexVertex;
 
 	/* for sorting strategy '-sort' argument */
 	bool sortingStrategyEnabled = false;
 	bool sortingDone 			= false;
-    std::priority_queue<int, std::vector<FlipElement>> flipQueue;
+    std::priority_queue<FlipElement, std::vector<FlipElement>, CompareFlipElement> flipQueue;
 
-    bool isStillSorting() { return sortingStrategyEnabled && !sortingDone; }
 };

@@ -26,7 +26,8 @@ void Tri::runTriangle(Data& data) {
 
 void Tri::resetForSortedFlipping() {
 	if(sortingStrategyEnabled) {
-		identifyTrisOnReflexInputVertices();
+		std::vector<EdgeIterator> list = data->identifiyReflexVertices();
+		setReflexVertices(list);
 
 		flippingDone = false;
 		sortingDone  = false;
@@ -34,44 +35,55 @@ void Tri::resetForSortedFlipping() {
 }
 
 void Tri::aSingleFlip() {
-	if(isStillSorting() && trisOnReflexVertex.empty()) {
+	if(isStillSorting() && allReflexVertices.empty()) {
 		sortingDone = true;
 	}
 
-	if(!trisOnReflexVertex.empty() || (sortingStrategyEnabled && !flipQueue.empty())) {
-
+	if(!allReflexVertices.empty() || (sortingStrategyEnabled && !flipQueue.empty())) {
 		Triangle tri;
 		EdgeIterator edgeIt;
 		ul selectIdx, vertex;
+		auto& poly = data->getPolygon();
 
 		if(!sortingStrategyEnabled || (sortingStrategyEnabled && !sortingDone)) {
-			/* obtain last triangle */
 
 			if(randomSelection) {
+				/* obtain random reflex vertex */
 				std::mt19937 gen(rd());
-				std::uniform_int_distribution<> dis(0, trisOnReflexVertex.size()-1);
+				std::uniform_int_distribution<> dis(0, allReflexVertices.size()-1);
 				ul pos = dis(gen);
-				vertex = trisOnReflexVertex[pos];
-				trisOnReflexVertex.erase(trisOnReflexVertex.begin() + pos);
+				edgeIt = allReflexVertices[pos];
+				allReflexVertices.erase(allReflexVertices.begin() + pos);
 			} else {
-				vertex = trisOnReflexVertex.back();
-				trisOnReflexVertex.pop_back();
+				/* obtain last reflex vertex */
+				edgeIt = allReflexVertices.back();
+				allReflexVertices.pop_back();
 			}
 
 		} else {
-			do {
-				/* we use sortingStrategy and we are done sorting */
-				auto top = flipQueue.top();
-				flipQueue.pop();
-				vertex = top.vertexIdx;
-			} while(!flipQueue.empty() && !data->isReflexVertex(vertex));
+			if(flipQueue.empty()) {return;}
+			else {
+				do {
+					/* we use sortingStrategy and we are done sorting */
+					auto top = flipQueue.top();
+					flipQueue.pop();
+					edgeIt = top.edgeIt;
+				} while(!flipQueue.empty() && !data->isNextVertexReflex(edgeIt));
+				if(flipQueue.empty() && !data->isNextVertexReflex(edgeIt)) {
+					if(config->verbose) {
+						LOG(WARNING) << vB(edgeIt) << "not a reflex vertex from queue!";
+					}
+					return;
+				}
+			}
 		}
+
+		vertex = vB(edgeIt);
 		tri = findTriangleWithCorner(vertex);
-		edgeIt = data->findEdgeBefore(vertex);
 
 		if(!data->isReflexVertex(vertex)) {
 			if(config->verbose) {
-				LOG(INFO) << "vertex " << vertex << " no longer reflex.";
+				LOG(WARNING) << "vertex " << vertex << " no longer reflex.";
 			}
 			return;
 		}
@@ -79,7 +91,7 @@ void Tri::aSingleFlip() {
 		if(!data->isNextVertexReflex(edgeIt)) {
 			data->setVertex(vertex,false);
 			if(config->verbose) {
-				LOG(ERROR) << "vertex not reflex?";
+				LOG(WARNING) << "vertex not reflex?";
 			}
 			return;
 		}
@@ -90,9 +102,8 @@ void Tri::aSingleFlip() {
 		IndexEdge b = *(data->nextEdge(edgeIt));
 
 		if(config->verbose) {
-			std::cout << "circle around: " << vertex << " edge vertices: " << a[0] << " "
-					  << b[0] << " " << b[1] << std::endl;
-			LOG(INFO) << "vertex: " << vertex;
+			LOG(INFO) << "circle around: " << vertex << " edge vertices: "
+					  << a[0] << " " << b[0] << " " << b[1];
 		}
 
 		/*************************************************************/
@@ -118,8 +129,12 @@ void Tri::aSingleFlip() {
 				if(config->verbose) {
 					LOG(INFO) << "addeing vertex " << (*edgeIt)[1] << " to flipqueue!";
 				}
-				Exact areaMod = (triArea > outSideArea) ? triArea-outSideArea : outSideArea-triArea;
-				flipQueue.push( FlipElement(vertex,areaMod) );
+
+				if(  (maximizing && triArea < outSideArea) ||
+					(!maximizing && triArea > outSideArea)) {
+					Exact areaMod = (triArea > outSideArea) ? triArea-outSideArea : outSideArea-triArea;
+					flipQueue.push( FlipElement(edgeIt,areaMod) );
+				}
 			} else {
 				/* update polygon "flip" (the actual flip) */
 				if( (maximizing && triArea < outSideArea) ||
@@ -134,21 +149,14 @@ void Tri::aSingleFlip() {
 					/* 'flipping-the-polygon' */
 					applyPolygonalFlip(tri,edgeIt, vertex,outsideTrisToRepair);
 					++flipCnt;
+					if(config->verbose) {LOG(INFO) << "flip " << flipCnt;}
 
-
-					if(!config->silent) {
+					if(!config->silent && !config->verbose) {
 						if(flipCnt%1000 == 0) {	std::cout << flipCnt; }
 						else {std::cout << ".";	}
 					}
 				}
 			}
-		}
-	} else {
-		if(flipCnt > flipCheck && !sortingStrategyEnabled) {
-			identifyTrisOnReflexInputVertices();
-			flipCheck = flipCnt;
-		} else {
-			flippingDone = true;
 		}
 	}
 }
@@ -234,14 +242,11 @@ bool Tri::getBestTriAroundVertex(const ul vertex, Triangle tri, const IndexEdge&
 
 			/* if outside tri is not a[0]a[1]b[1] */
 			if(!isOnVertices(tri,a[0],a[1],b[1])) {
-				if(config->verbose) {
-					//LOG(INFO) << "outside tri " << tri << " added to repair stack";
-				}
 				outsideTrisToRepair.push_back(tri.id);
 			}
 		}
 
-		/* iterate around revlex 'vertex' triangle by triangle */
+		/* iterate around reflex 'vertex' triangle by triangle */
 		tri = getNextCCWTriangleAroundVertex(tri,vertex);
 
 	} while( tri.id != triStart.id && isValidVertex );
@@ -326,14 +331,12 @@ void Tri::applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul 
 			updateModifiedCorners(edgeIt,edgeItA);
 		}
 	}
-
-	if(config->verbose) {LOG(INFO) << "flip " << flipCnt;}
 }
 
 
-void Tri::updateModifiedCorner(const ul vertex) {
+void Tri::updateModifiedCorner(const EdgeIterator edgeIt) {
+	ul vertex = (*edgeIt)[1];
 	Triangle tri = findTriangleWithCorner(vertex);
-	auto edgeIt  = data->findEdgeBefore(vertex);
 	auto a 		 = *edgeIt;
 	auto b 		 = *(data->nextEdge(edgeIt));
 	ul triIdx 	 = ULMAX;
@@ -354,7 +357,7 @@ void Tri::updateModifiedCorner(const ul vertex) {
 			LOG(INFO) << "addeing vertex " << (*edgeIt)[1] << " to flipqueue!";
 		}
 		Exact areaMod = (triArea > outSideArea) ? triArea-outSideArea : outSideArea-triArea;
-		flipQueue.push( FlipElement(vertex,areaMod) );
+		flipQueue.push( FlipElement(edgeIt,areaMod) );
 	}
 }
 
@@ -362,9 +365,9 @@ void Tri::updateModifiedCorners(const EdgeIterator twoIncident, const EdgeIterat
 	assert(sortingStrategyEnabled);
 	/* update twoIncident [0] and [1] */
 	/* update nextThree [0] and [1] and next [0] */
-	for(ul vertex : {vA(twoIncident), vB(twoIncident), vA(nextThree), vB(nextThree), vA(data->nextEdge(nextThree))}) {
-		if(!data->isReflexVertex(vertex)) {continue;}
-		updateModifiedCorner(vertex);
+	for(EdgeIterator edgeIt : {data->prevEdge(twoIncident), twoIncident, data->prevEdge(nextThree), nextThree, data->nextEdge(nextThree)}) {
+		if(!data->isReflexVertex((*edgeIt)[1])) {continue;}
+		updateModifiedCorner(edgeIt);
 	}
 }
 
@@ -408,14 +411,6 @@ bool Tri::isInvertable(const Triangle& tri, ul vertex) const {
 	return false;
 }
 
-
-void Tri::identifyTrisOnReflexInputVertices() {
-	for(auto i : data->getPolygon()) {
-		if(data->isReflexVertex(i[1])) {
-			trisOnReflexVertex.push_back(i[1]);
-		}
-	}
-}
 
 Exact Tri::getArea(const Triangle& tri) const {
 	return CGAL::area(getPoint(tri.a),getPoint(tri.b),getPoint(tri.c));
@@ -500,13 +495,6 @@ void Tri::flipPair(Triangle ta, Triangle tb) {
 
 	taNew.setNeighbors(tb.diagonalNeighbor(cp[1]),tb.id,ta.diagonalNeighbor(cp[1]));
 	tbNew.setNeighbors(ta.diagonalNeighbor(cp[0]),ta.id,tb.diagonalNeighbor(cp[0]));
-
-	if(config->verbose && (ta.id == 65 || ta.id==62)) {
-		LOG(INFO) << "Old ta: " << ta;
-		LOG(INFO) << "Old tb: " << tb;
-		LOG(INFO) << "New ta: " << taNew;
-		LOG(INFO) << "New tb: " << tbNew;
-	}
 
 	writeBack(taNew);
 	writeBack(tbNew);

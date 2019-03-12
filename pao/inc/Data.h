@@ -99,6 +99,8 @@ public:
 
 	void setVertex(ul idx, bool reflex) {IVreflex[idx] = reflex;}
 
+	std::vector<EdgeIterator> identifiyReflexVertices();
+
 private:
 	bool loadFile(const std::string& fileName);
 
