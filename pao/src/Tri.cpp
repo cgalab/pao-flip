@@ -26,8 +26,7 @@ void Tri::runTriangle(Data& data) {
 
 void Tri::resetForSortedFlipping() {
 	if(sortingStrategyEnabled) {
-		std::vector<EdgeIterator> list = data->identifiyReflexVertices();
-		setReflexVertices(list);
+		setReflexVertices();
 
 		flippingDone = false;
 		sortingDone  = false;
@@ -46,20 +45,8 @@ void Tri::aSingleFlip() {
 		auto& poly = data->getPolygon();
 
 		if(!sortingStrategyEnabled || (sortingStrategyEnabled && !sortingDone)) {
-
-			if(randomSelection) {
-				/* obtain random reflex vertex */
-				std::mt19937 gen(rd());
-				std::uniform_int_distribution<> dis(0, allReflexVertices.size()-1);
-				ul pos = dis(gen);
-				edgeIt = allReflexVertices[pos];
-				allReflexVertices.erase(allReflexVertices.begin() + pos);
-			} else {
-				/* obtain last reflex vertex */
-				edgeIt = allReflexVertices.back();
-				allReflexVertices.pop_back();
-			}
-
+			edgeIt = allReflexVertices.back();
+			allReflexVertices.pop_back();
 		} else {
 			if(flipQueue.empty()) {return;}
 			else {

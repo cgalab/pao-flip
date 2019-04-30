@@ -83,8 +83,7 @@ void Pao::run() {
 //		data->writePolyToOptPoly();
 
 		if(config.verbose) {LOG(INFO) << "Flipping...";}
-		std::vector<EdgeIterator> list = data->identifiyReflexVertices();
-		tri.setReflexVertices(list);
+		tri.setReflexVertices();
 
 		if(!config.gui) {
 
@@ -99,8 +98,7 @@ void Pao::run() {
 					}
 
 					if(!config.enableSortingStrategy && cnt < tri.getFlipCnt()) {
-						list = data->identifiyReflexVertices();
-						tri.setReflexVertices(list);
+						tri.setReflexVertices();
 						if(config.verbose) {
 							LOG(INFO) << "refill reflex vertex list";
 						}

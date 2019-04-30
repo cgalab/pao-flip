@@ -274,7 +274,14 @@ public:
 	bool isStillSorting() const { return sortingStrategyEnabled && !sortingDone; }
 	bool isSortingDone() const { return sortingDone; }
 	bool isFlipQueueEmpty() const {return flipQueue.empty();}
-	void setReflexVertices(std::vector<EdgeIterator> list) {allReflexVertices = list;}
+	//void setReflexVertices(std::vector<EdgeIterator> list) {allReflexVertices = list;}
+	void setReflexVertices() {
+		std::vector<EdgeIterator> list = data->identifiyReflexVertices();
+		if(randomSelection) {
+			std::shuffle(list.begin(), list.end(), std::mt19937{ rd() });
+		}
+		allReflexVertices = list;
+	}
 
 private:
 	void filltriangulateioIn(Data& data, triangulateio& tri);

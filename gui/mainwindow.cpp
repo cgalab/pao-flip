@@ -127,8 +127,7 @@ void MainWindow::on_actionEventStep_triggered() {
 
 	if(!pao.tri.hasReflexVertices() && pao.tri.getFlipCnt() > flipCntCheck && !pao.config.enableSortingStrategy) {
 		/* rebuild reflex list and keep going */
-		auto list = pao.data->identifiyReflexVertices();
-		pao.tri.setReflexVertices(list);
+		pao.tri.setReflexVertices();
 		flipCntCheck = pao.tri.getFlipCnt();
 	}
 
