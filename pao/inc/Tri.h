@@ -288,7 +288,7 @@ private:
 	void inittriangulateioOut(Data& data, triangulateio& tri);
 
 	bool getBestTriAroundVertex(const ul vertex, Triangle tri, const IndexEdge& a, const IndexEdge& b,
-			std::list<ul>& outsideTrisToRepair, ul& triIdxChosen);
+			std::list<ul>& outsideTrisToRepair, ul& triIdxChosen, std::vector<ul>& triIndices);
 
 	void applyPolygonalFlip(const Triangle& tri, EdgeIterator edgeIt, const ul vertex,
 			std::list<ul>& outsideTrisToRepair);

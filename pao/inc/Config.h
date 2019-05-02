@@ -16,7 +16,7 @@ public:
  	, outputFileName("")
 	, validConfig(false) {
 		printOptions =  "[-h] [-max|-min] [-v|-s] ";
-		printOptions += "[-r] [-sort|-rand] [-invert] [-area <AREA>] ";
+		printOptions += "[-r|-rr] [-sort|-rand] [-invert] [-area <AREA>] ";
 		printOptions += "[-poly|-obj <filename>] <filename>";
 	}
 
@@ -36,6 +36,7 @@ public:
 			 << "  -invert \t\talso enable inverter (weasel's strategy)" << std::endl
 			 << "  -area <AREA> \t\tstate an area bound that has to be beaten" << std::endl
 			 << "  -r \t\t\tenable reflex sensitive flipping in the polygon" << std::endl
+			 << "  -rr \t\t\t-r plus choose a random triangle among the triangles on a vertex" << std::endl
 			 << "  -v \t\t\tverbose mode, shows more information about the computation" << std::endl
 			 << "  -s \t\t\tsilent mode, shows no information" << std::endl
 			 << "  -obj <file> \t\twrite output in wavefront obj format (3D coordinates)" << std::endl
@@ -60,6 +61,7 @@ public:
 	bool 			maximize;
 	bool 			enableSortingStrategy 	= false;
 	bool 			reflexSensitiveFlipping = false;
+	bool 			randomlyChooseTriangleAroundVertex = false;
 	bool			chooseByRandom 			= false;
 
 	bool			inverterEnabled 		= false;

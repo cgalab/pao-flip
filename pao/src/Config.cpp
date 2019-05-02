@@ -28,6 +28,9 @@ bool Config::evaluateArguments(std::list<std::string> args) {
 				maximize 		= false;
 			} else if (argument == "-r") {
 				reflexSensitiveFlipping = true;
+			} else if (argument == "-rr") {
+				reflexSensitiveFlipping = true;
+				randomlyChooseTriangleAroundVertex = true;
 			} else if (argument == "-area") {
 				isAreaBoundSet = true;
 

@@ -97,13 +97,23 @@ void Tri::aSingleFlip() {
 		/* iterates around 'vertex' and finds most extreme triangle  */
 		/*************************************************************/
 		ul triIdx = ULMAX;
+		std::vector<ul> triIndices;
 		std::list<ul> outsideTrisToRepair;
-		bool isValidVertex = getBestTriAroundVertex(vertex,tri,a,b, outsideTrisToRepair,triIdx);
+		bool isValidVertex = getBestTriAroundVertex(vertex,tri,a,b, outsideTrisToRepair,triIdx,triIndices);
 
 		/********************************************************************/
 		/* checks validity of found triangle and modifies poly or sorts it  */
 		/********************************************************************/
 		if(isValidVertex && triIdx != ULMAX) {
+			/* -rr option */
+			if(config->randomlyChooseTriangleAroundVertex) {
+				assert(!triIndices.empty());
+				//ul randomIdx = std::rand()/((RAND_MAX + 1u)/(triIndices.size()-1));
+				ul randomIdx = std::rand() % triIndices.size();
+				triIdx = triIndices[randomIdx];
+				//LOG(INFO) << "num indices " << triIndices.size() << " chosenidx: " << triIdx;
+			}
+
 			tri = getTriangle(triIdx);
 			Exact triArea = getArea(tri);
 			Exact outSideArea = CGAL::area(data->v(a[0]),data->v(b[1]),data->v(b[0]));
@@ -149,7 +159,7 @@ void Tri::aSingleFlip() {
 }
 
 bool Tri::getBestTriAroundVertex(const ul vertex, Triangle tri, const IndexEdge& a, const IndexEdge& b,
-		std::list<ul>& outsideTrisToRepair, ul& triIdxChosen) {
+		std::list<ul>& outsideTrisToRepair, ul& triIdxChosen, std::vector<ul>& triIndices) {
 
 	bool inPoly;
 	auto triStart = tri;
@@ -196,11 +206,13 @@ bool Tri::getBestTriAroundVertex(const ul vertex, Triangle tri, const IndexEdge&
 					if(area < triArea) {
 						triArea = area;
 						triIdxChosen  = tri.id;
+						triIndices.push_back(tri.id);
 					}
 				} else {
 					if(area > triArea) {
 						triArea = area;
 						triIdxChosen  = tri.id;
+						triIndices.push_back(tri.id);
 					}
 				}
 			}
@@ -327,9 +339,10 @@ void Tri::updateModifiedCorner(const EdgeIterator edgeIt) {
 	auto a 		 = *edgeIt;
 	auto b 		 = *(data->nextEdge(edgeIt));
 	ul triIdx 	 = ULMAX;
+	std::vector<ul> triIndices;
 	std::list<ul> outsideTrisToRepair;
 
-	bool isValidVertex = getBestTriAroundVertex(vertex,tri,a,b, outsideTrisToRepair,triIdx);
+	bool isValidVertex = getBestTriAroundVertex(vertex,tri,a,b, outsideTrisToRepair,triIdx,triIndices);
 
 	if(isValidVertex && triIdx != ULMAX) {
 		tri = getTriangle(triIdx);
