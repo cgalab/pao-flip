@@ -41,8 +41,8 @@ wavefront .obj file).
 
 * [easyloggingpp](https://github.com/weaselp/easyloggingpp)
   Logging Library
-* [triangle](git@gitlab.cosy.sbg.ac.at:cg/code/triangle.git)
-  Triangle on our gitlab
+* [triangle](https://github.com/guenthereder/triangle)
+  Fork of Shewchuk's Triangle
 
 # License
 pao-flip is written in C++ and uses CGAL.  
