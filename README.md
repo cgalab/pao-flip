@@ -18,6 +18,16 @@ wavefront .obj file).
 - CGAL 
 - Linux or Mac OS
 
+# Compiling
+
+		git clone --recurse-submodules https://github.com/cgalab/pao-flip
+		mkdir -p pao-flip/build && cd pao-flip/build
+		cmake .. 
+		make -j 6
+
+In case the repository is already checked out without the submodules enter use:
+
+		git submodule update --init --recursive
 
 # Usage
 
