@@ -7,7 +7,7 @@ add_executable(pao
                        )
 TARGET_LINK_LIBRARIES( pao
                        paolib
-                       trianglelib
+                       triangle
                         )
 target_include_directories(pao PRIVATE ../pao/triangle)
 target_include_directories(pao PRIVATE ../pao/inc)

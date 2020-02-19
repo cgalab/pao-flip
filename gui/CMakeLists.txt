@@ -1,7 +1,7 @@
 project (paogui VERSION "1.99" DESCRIPTION "paogui")
 
 find_package(Qt5Widgets REQUIRED)
-find_package(CGAL COMPONENTS Qt5 Core Debug REQUIRED)
+find_package(CGAL COMPONENTS Qt5 Core REQUIRED)
 
 include(${CGAL_USE_FILE})
 
@@ -19,7 +19,7 @@ target_link_libraries(paogui ${QT_LIBRARIES})
 target_link_libraries(paogui ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES})
 TARGET_LINK_LIBRARIES( paogui
                        paolib
-                       trianglelib )
+                       triangle)
 
 target_include_directories(paogui PRIVATE ../triangle)
 target_include_directories(paogui PRIVATE ../pao/inc)

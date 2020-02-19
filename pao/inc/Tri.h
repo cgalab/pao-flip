@@ -13,6 +13,13 @@
 #include "Config.h"
 #include "cgTypes.h"
 
+#ifndef REAL
+#define REAL double
+#endif
+#ifndef VOID
+#define VOID void
+#endif
+
 /* interact with triangle */
 #ifdef __cplusplus
 extern "C" {
